@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "noEmit": true,
+    "paths": {
+      "#/*": ["*"],
+      "#infrastructure/*": ["infrastructure/*"],
+      "#services/*": ["services/*"],
+      "#utils/*": ["utils/*"],
+    },
+  },
+  "include": ["."]
+}

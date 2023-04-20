@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  azula:
+    build:
+      context: ./
+    env_file:
+      - .env
+      - .env.production
+    image: ${DOCKER_REGISTRY}azula:latest
+    restart: unless-stopped

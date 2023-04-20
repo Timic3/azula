@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+.env.production
+src/commands/eval.ts
+src/interaction-handlers/modals/interaction.eval.ts
+pu.sh
