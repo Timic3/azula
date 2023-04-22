@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  azula:
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules/
+    command: npm run dev
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development

@@ -1,6 +1,11 @@
+
+ARG NODE_ENV
+
 # Base
 
 FROM node:18-alpine AS base
+
+WORKDIR /usr/src/app
 
 RUN apk add --no-cache --virtual .build-deps \
   g++ \
@@ -10,8 +15,6 @@ RUN apk add --no-cache --virtual .build-deps \
   libtool \
   python3
 
-WORKDIR /usr/src/app
-
 COPY --chown=node:node package.json .
 COPY --chown=node:node package-lock.json .
 
@@ -19,7 +22,9 @@ COPY --chown=node:node package-lock.json .
 
 FROM base AS build
 
-ENV NODE_ENV="production"
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=development
 
 COPY --chown=node:node tsconfig.base.json tsconfig.base.json
 COPY --chown=node:node tsup.config.ts .
@@ -32,7 +37,9 @@ RUN npm run build
 
 FROM base AS bot
 
-ENV NODE_ENV="production"
+WORKDIR /usr/src/app
+
+# ENV NODE_ENV $NODE_ENV
 ENV NODE_OPTIONS="--preserve-symlinks --enable-source-maps"
 
 COPY --chown=node:node --from=build /usr/src/app/node_modules node_modules
