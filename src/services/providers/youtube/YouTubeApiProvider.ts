@@ -1,6 +1,6 @@
 import { request } from 'undici';
 
-import AbstractProvider, { ProviderSearchList, ProviderSearchResult } from '#services/providers/AbstractProvider';
+import AbstractProvider, { ProviderSearchList, ProviderSearchItem, ProviderSearchOneResult } from '#services/providers/AbstractProvider';
 import { Schema$SearchListResponse } from '#services/providers/youtube/interface/YouTubeApiSearchSchema';
 
 export default class YouTubeApiProvider extends AbstractProvider {
@@ -20,12 +20,17 @@ export default class YouTubeApiProvider extends AbstractProvider {
     return this.transformSearchData((await body.json()) as Schema$SearchListResponse);
   }
 
+  // TODO
+  public async searchOne(query: string): Promise<ProviderSearchOneResult | null> {
+    return null;
+  }
+
   public async suggestions(query: string): Promise<string[]> {
     return [];
   }
 
   private transformSearchData(data: Schema$SearchListResponse): ProviderSearchList {
-    const items: ProviderSearchResult[] = [];
+    const items: ProviderSearchItem[] = [];
 
     for (const item of data.items ?? []) {
       if (!item.id?.videoId) continue;

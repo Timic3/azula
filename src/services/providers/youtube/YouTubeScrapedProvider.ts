@@ -1,11 +1,37 @@
 import { Video, YouTube } from 'youtube-sr';
 
-import AbstractProvider, { ProviderSearchList, ProviderSearchResult } from '#services/providers/AbstractProvider';
+import AbstractProvider, { ProviderSearchList, ProviderSearchItem, ProviderSearchOneResult } from '#services/providers/AbstractProvider';
 
 export default class YouTubeScrapedProvider extends AbstractProvider {
   public async search(query: string): Promise<ProviderSearchList> {
     const result = await YouTube.search(query, { type: 'video', limit: 5 });
     return this.transformSearchData(result);
+  }
+
+  public async searchOne(query: string): Promise<ProviderSearchOneResult | null> {
+    if (YouTube.validate(query, 'PLAYLIST')) {
+      const result = await YouTube.getPlaylist(query, { limit: 100 });
+      return {
+        type: 'list',
+        result: this.transformSearchData(result.videos),
+      }
+    } else if (YouTube.validate(query, 'VIDEO')) {
+      const result = await YouTube.getVideo(query);
+      return {
+        type: 'item',
+        result: this.transformVideoResultData(result),
+      }
+    }
+
+    const result = await YouTube.searchOne(query, 'video');
+    if (result !== null) {
+      return {
+        type: 'item',
+        result: this.transformVideoResultData(result),
+      }
+    }
+
+    return null;
   }
 
   public async suggestions(query: string): Promise<string[]> {
@@ -14,26 +40,30 @@ export default class YouTubeScrapedProvider extends AbstractProvider {
   }
 
   private transformSearchData(data: Video[]): ProviderSearchList {
-    const items: ProviderSearchResult[] = [];
+    const items: ProviderSearchItem[] = [];
 
     for (const item of data) {
-      items.push({
-        title: item.title ?? 'N/A',
-        description: item.description ?? 'N/A',
-        duration: item.duration,
-        sourceUrl: item.url,
-        author: {
-          title: item.channel?.name ?? 'N/A',
-          profileUrl: item.channel?.url ?? undefined,
-        },
-        thumbnailUrl: item.thumbnail?.url ?? undefined,
-        // Date of upload while scraping is really vague.
-        // publishedAt: item.uploadedAt ? new Date(item.uploadedAt) : undefined,
-      });
+      items.push(this.transformVideoResultData(item));
     }
 
     return {
       items
+    }
+  }
+
+  private transformVideoResultData(video: Video): ProviderSearchItem {
+    return {
+      title: video.title ?? 'N/A',
+      description: video.description ?? 'N/A',
+      duration: video.duration,
+      sourceUrl: video.url,
+      author: {
+        title: video.channel?.name ?? 'N/A',
+        profileUrl: video.channel?.url ?? undefined,
+      },
+      thumbnailUrl: video.thumbnail?.url ?? undefined,
+      // Date of upload while scraping is really vague.
+      // publishedAt: item.uploadedAt ? new Date(item.uploadedAt) : undefined,
     }
   }
 }
