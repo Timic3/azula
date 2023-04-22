@@ -37,7 +37,10 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     this.current = this.dequeue();
+    this.playCurrent()
+  }
 
+  playCurrent() {
     if (this.current) {
       container.logger.info('Now playing...', this.current);
 
@@ -49,6 +52,15 @@ export default abstract class BaseQueue implements IQueue {
       });
 
       this.voice.play(this.current.url);
+    } else {
+      this.voice.stop();
     }
+  }
+
+  skip() {
+    const skipped = this.current;
+    this.current = this.dequeue();
+    this.playCurrent();
+    return [skipped || undefined, this.current || undefined];
   }
 }
