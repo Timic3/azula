@@ -117,6 +117,10 @@ export default class Voice extends EventEmitter {
     this.audioPlayer.unpause();
   }
 
+  public async stop() {
+    this.audioPlayer.stop(true)
+  }
+
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {
     if (voiceChannel.id === this.voiceChannel.id) return;
     // Subscription to existing audio player might be handled internally by @discordjs/voice? Research.
