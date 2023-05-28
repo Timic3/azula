@@ -37,7 +37,7 @@ export class PlayCommand extends Command {
     }
 
     current ? 
-    context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }):
+    context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }) :
     context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
   }
 }
