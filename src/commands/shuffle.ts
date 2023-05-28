@@ -1,3 +1,4 @@
+import BaseQueue from '#/services/queue/BaseQueue';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
@@ -31,8 +32,11 @@ export class PlayCommand extends Command {
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const queue = await this.container.queueManager.shuffle(voiceChannel);
-    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue)
-
-    queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
+    if (queue instanceof Array<any>) {
+      throw new Error("Queue should not be and instance of Array<any>.")
+    } else {
+      const queueEmbed = this.container.queueManager.buildQueueEmbed(queue)
+      queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
+    }
   }
 }

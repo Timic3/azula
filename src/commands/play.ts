@@ -88,9 +88,21 @@ export class PlayCommand extends Command {
       });
     } else {
       const list = result.result as ProviderSearchList;
+      
+      let playlist = list.items;
+      if (shuffle) {
+        const shuffledItems = await this.container.queueManager.shuffle(voiceChannel, list.items);
+        if (shuffledItems instanceof Array<any>) {
+          playlist = shuffledItems
+        } else {
+          throw new Error("shuffledItems should not be an instance of BaseQueue.")
+        }
+        this.reply(context, `Enqueuing \`${list.items.length}\` items. The playlist was shuffled.`);
+      } else {
+        this.reply(context, `Enqueuing \`${list.items.length}\` items.`);
+      }
 
-
-      for (const item of list.items) {
+      for (const item of playlist) {
         queue.enqueue({
           artist: item.author.title,
           description: item.description,
@@ -99,13 +111,6 @@ export class PlayCommand extends Command {
           title: item.title,
           url: item.sourceUrl,
         });
-      }
-
-      if (shuffle) {
-        this.container.queueManager.shuffle(voiceChannel, queue);
-        this.reply(context, `Enqueued \`${list.items.length}\` items. The playlist was shuffled.`);
-      } else {
-        this.reply(context, `Enqueued \`${list.items.length}\` items.`);
       }
     }
   }

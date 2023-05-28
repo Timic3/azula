@@ -29,9 +29,9 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     return [skipped, current]
   }
 
-  async shuffle(voiceChannel: VoiceBasedChannel, customQueue?: BaseQueue): Promise<BaseQueue> {
+  async shuffle(voiceChannel: VoiceBasedChannel, customArray?: Array<any>): Promise<BaseQueue | Array<any>> {
     let queue = await this.create(voiceChannel);
-    return queue.shuffle(customQueue);
+    return queue.shuffle(customArray);
   }
 
   public buildQueueEmbed(queue: BaseQueue): EmbedBuilder | undefined {
