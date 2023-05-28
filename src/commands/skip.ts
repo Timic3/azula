@@ -32,22 +32,12 @@ export class PlayCommand extends Command {
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {    
     const [skipped, current] = await this.container.queueManager.skip(voiceChannel);
 
-    if (context instanceof ChatInputCommandInteraction) {
-      if (!skipped) {
-        return context.editReply({ content: 'The queue is empty.' });
-      }
-
-      current ? 
-      context.editReply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }) :
-      context.editReply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
-    } else {
-      if (!skipped) {
-        return context.reply({ content: 'The queue is empty.' });
-      }
-
-      current ? 
-      context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }):
-      context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
+    if (!skipped) {
+      return context.reply({ content: 'The queue is empty.' });
     }
+
+    current ? 
+    context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }) :
+    context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
   }
 }

@@ -63,4 +63,23 @@ export default abstract class BaseQueue implements IQueue {
     this.playCurrent();
     return [skipped || undefined, this.current || undefined];
   }
+
+  shuffle(customArray?: Array<any>): BaseQueue | Array<any> {
+    const queue = customArray || this.queue;
+
+    if (queue) {
+      // Durstenfeld shuffle
+      for (let i = queue.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [queue[i], queue[j]] = [queue[j], queue[i]];
+      }
+    }
+
+    if (!customArray) {
+      this.queue = queue;
+      return this;
+    }
+
+    return customArray;
+  }
 }

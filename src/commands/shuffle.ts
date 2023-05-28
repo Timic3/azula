@@ -4,7 +4,7 @@ import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
-  aliases: ['q', 'queue'],
+  aliases: ['shuffle'],
   description: 'Get the current queue.',
   preconditions: ['InsideVoiceChannel'],
 })
@@ -15,7 +15,7 @@ export class PlayCommand extends Command {
         .setName(this.name)
         .setDescription(this.description),
       {
-        idHints: ['478694795454274752'],
+        idHints: ['247468218264236471'],
       }
     );
   }
@@ -31,9 +31,12 @@ export class PlayCommand extends Command {
   }
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
-    const queue = await this.container.queueManager.create(voiceChannel);
-    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
-
-    queueEmbed && queue.current ? context.reply({ embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
+    const queue = await this.container.queueManager.shuffle(voiceChannel);
+    if (queue instanceof Array<any>) {
+      throw new Error("Queue should not be and instance of Array<any>.");
+    } else {
+      const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
+      queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
+    }
   }
 }
