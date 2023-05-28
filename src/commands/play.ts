@@ -5,6 +5,7 @@ import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } 
 
 @ApplyOptions<Command.Options>({
   aliases: ['p', 'pl'],
+  flags: ['s', 'shuffle'],
   description: 'Play or add music to queue.',
   preconditions: ['InsideVoiceChannel'],
 })
@@ -22,6 +23,12 @@ export class PlayCommand extends Command {
             .setMaxLength(100)
             .setRequired(true)
             .setAutocomplete(true)
+        )
+        .addBooleanOption((option) =>
+          option
+          .setName('shuffle')
+          .setDescription('Shuffles the enqueued playlist.')
+          .setRequired(false)
         ),
       {
         idHints: ['985329784139690047'],
@@ -32,12 +39,14 @@ export class PlayCommand extends Command {
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
     await interaction.deferReply();
     const voiceChannel = (interaction.member as GuildMember).voice.channel as VoiceBasedChannel;
-    this.handle(interaction, voiceChannel, interaction.options.getString('query', true));
+    const shouldShuffle = interaction.options.getBoolean('shuffle', false) || false
+    this.handle(interaction, voiceChannel, interaction.options.getString('query', true), shouldShuffle);
   }
 
   public async messageRun(message: Message, args: Args) {
     const voiceChannel = message.member?.voice.channel as VoiceBasedChannel;
-    this.handle(message, voiceChannel, await args.rest('string'));
+    const shouldShuffle = args.getFlags('s', 'shuffle');
+    this.handle(message, voiceChannel, await args.rest('string'), shouldShuffle);
   }
 
   public override async autocompleteRun(interaction: Command.AutocompleteInteraction) {
@@ -54,7 +63,7 @@ export class PlayCommand extends Command {
     );
   }
 
-  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, query: string) {
+  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, query: string, shuffle: boolean) {
     const result = await this.container.provider.searchOne(query);
     if (result === null) return this.reply(context, `:diamonds: **Couldn't find anything with your query.**`);
 
@@ -80,7 +89,6 @@ export class PlayCommand extends Command {
     } else {
       const list = result.result as ProviderSearchList;
 
-      this.reply(context, `Enqueueing \`${list.items.length}\` items.`);
 
       for (const item of list.items) {
         queue.enqueue({
@@ -91,6 +99,13 @@ export class PlayCommand extends Command {
           title: item.title,
           url: item.sourceUrl,
         });
+      }
+
+      if (shuffle) {
+        this.container.queueManager.shuffle(voiceChannel, queue);
+        this.reply(context, `Enqueued \`${list.items.length}\` items. The playlist was shuffled.`);
+      } else {
+        this.reply(context, `Enqueued \`${list.items.length}\` items.`);
       }
     }
   }

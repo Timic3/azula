@@ -1,3 +1,4 @@
+import BaseQueue from '#/services/queue/BaseQueue';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
@@ -31,27 +32,8 @@ export class PlayCommand extends Command {
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const queue = await this.container.queueManager.create(voiceChannel);
+    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue)
 
-    // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
-    let queueEmbed;
-    if (queue.current) {
-      const queueTitles = queue.queue.slice(0, 5).map((item, index) => `\`${index + 1}. ${item.title} \``);
-      const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
-      queueEmbed = new EmbedBuilder()
-        .setColor(0xE0812D)
-        .addFields(
-          { "name": `Current song playing:`, "value": `\`${queue.current.title}\``, "inline": true },
-          { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
-        );
-      if (itemsRemaining){
-        queueEmbed.addFields({ "name": "\u200B", "value": `And \`${itemsRemaining}\` other items.` });
-      }
-    }
-
-    if (context instanceof ChatInputCommandInteraction) {
-      queueEmbed && queue.current ? context.editReply({ embeds: [queueEmbed] }) : context.editReply({ content: `The queue is empty.` });
-    } else {
-      queueEmbed && queue.current ? context.reply({ embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
-    }
+    queueEmbed && queue.current ? context.reply({ embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
   }
 }

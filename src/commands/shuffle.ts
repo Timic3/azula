@@ -1,10 +1,10 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command } from '@sapphire/framework';
-import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
+import { ChatInputCommand, Command } from '@sapphire/framework';
+import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
-  aliases: ['s', 'skip'],
-  description: 'Skip the current song.',
+  aliases: ['shuffle'],
+  description: 'Get the current queue.',
   preconditions: ['InsideVoiceChannel'],
 })
 export class PlayCommand extends Command {
@@ -14,7 +14,7 @@ export class PlayCommand extends Command {
         .setName(this.name)
         .setDescription(this.description),
       {
-        idHints: ['653221772374673210'],
+        idHints: ['247468218264236471'],
       }
     );
   }
@@ -29,15 +29,10 @@ export class PlayCommand extends Command {
     this.handle(message, voiceChannel);
   }
 
-  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {    
-    const [skipped, current] = await this.container.queueManager.skip(voiceChannel);
+  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
+    const queue = await this.container.queueManager.shuffle(voiceChannel);
+    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue)
 
-    if (!skipped) {
-      return context.reply({ content: 'The queue is empty.' });
-    }
-
-    current ? 
-    context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }):
-    context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
+    queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
   }
 }
