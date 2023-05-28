@@ -39,7 +39,7 @@ export class PlayCommand extends Command {
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
     await interaction.deferReply();
     const voiceChannel = (interaction.member as GuildMember).voice.channel as VoiceBasedChannel;
-    const shouldShuffle = interaction.options.getBoolean('shuffle', false) || false
+    const shouldShuffle = interaction.options.getBoolean('shuffle', false) || false;
     this.handle(interaction, voiceChannel, interaction.options.getString('query', true), shouldShuffle);
   }
 
@@ -93,9 +93,9 @@ export class PlayCommand extends Command {
       if (shuffle) {
         const shuffledItems = await this.container.queueManager.shuffle(voiceChannel, list.items);
         if (shuffledItems instanceof Array<any>) {
-          playlist = shuffledItems
+          playlist = shuffledItems;
         } else {
-          throw new Error("shuffledItems should not be an instance of BaseQueue.")
+          throw new Error("shuffledItems should not be an instance of BaseQueue.");
         }
         this.reply(context, `Enqueuing \`${list.items.length}\` items. The playlist was shuffled.`);
       } else {

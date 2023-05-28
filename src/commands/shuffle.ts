@@ -33,9 +33,9 @@ export class PlayCommand extends Command {
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const queue = await this.container.queueManager.shuffle(voiceChannel);
     if (queue instanceof Array<any>) {
-      throw new Error("Queue should not be and instance of Array<any>.")
+      throw new Error("Queue should not be and instance of Array<any>.");
     } else {
-      const queueEmbed = this.container.queueManager.buildQueueEmbed(queue)
+      const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
       queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
     }
   }

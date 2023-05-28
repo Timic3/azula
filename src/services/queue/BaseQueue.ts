@@ -65,7 +65,7 @@ export default abstract class BaseQueue implements IQueue {
   }
 
   shuffle(customArray?: Array<any>): BaseQueue | Array<any> {
-    const queue = customArray || this.queue
+    const queue = customArray || this.queue;
 
     if (queue) {
       // Durstenfeld shuffle
@@ -76,10 +76,10 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     if (!customArray) {
-      this.queue = queue
-      return this
+      this.queue = queue;
+      return this;
     }
 
-    return customArray
+    return customArray;
   }
 }
