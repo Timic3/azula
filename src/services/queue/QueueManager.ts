@@ -38,16 +38,21 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
     let queueEmbed;
     if (queue.current) {
-      const queueTitles = queue.queue.slice(0, 5).map((item, index) => `\`${index + 1}. ${item.title} \``);
+      const queueTitles = queue.queue.slice(0, 5).map((item, index) => `\`${index + 1}. ${item.title} (${queue.formatDuration(item.duration || 0)})\``);
       const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
+      const totalPlayTime = [queue.current.duration || 0, ...queue.queue.map(item => item.duration || 0)].reduce((a, b) => a + b, 0);
+
       queueEmbed = new EmbedBuilder()
         .setColor(0xE0812D)
+        .setThumbnail(queue.current.thumbnail || "")
         .addFields(
-          { "name": `Current song playing:`, "value": `\`${queue.current.title}\``, "inline": true },
+          { "name": `Current song playing:`, "value": `\`${queue.current.title} (${queue.formatDuration(queue.current.duration || 0)})\``, "inline": true },
           { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
         );
       if (itemsRemaining){
-        queueEmbed.addFields({ "name": "\u200B", "value": `And \`${itemsRemaining}\` other items.` });
+        queueEmbed.addFields({ "name": "\u200B", "value": `And \`${itemsRemaining}\` other items. Total playtime is \`${queue.formatDuration(totalPlayTime)}\`.` });
+      } else {
+        queueEmbed.addFields({ "name": "\u200B", "value": `Total playtime is \`${queue.formatDuration(totalPlayTime)}\`.` });
       }
     }
     return queueEmbed;

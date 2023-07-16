@@ -82,4 +82,15 @@ export default abstract class BaseQueue implements IQueue {
 
     return customArray;
   }
+
+  formatDuration (duration: number): String {
+    // :param duration: miliseconds
+    // We can use Moment.js library in the future, if needed
+
+    if (duration / 1000 < 3600) {
+      return new Date(duration).toISOString().substring(14, 19)
+    }
+
+    return new Date(duration).toISOString().substring(11, 16)
+  }
 }
