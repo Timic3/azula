@@ -92,7 +92,7 @@ export class PlayCommand extends Command {
       let playlist = list.items;
       if (shuffle) {
         const shuffledItems = await this.container.queueManager.shuffle(voiceChannel, list.items);
-        if (shuffledItems instanceof Array<any>) {
+        if (shuffledItems instanceof Array) {
           playlist = shuffledItems;
         } else {
           throw new Error("shuffledItems should not be an instance of BaseQueue.");
