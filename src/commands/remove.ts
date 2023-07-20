@@ -51,7 +51,7 @@ export class PlayCommand extends Command {
       context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
     } else {
       const removed = queue.remove(position - 1)
-      this.reply(context, removed ? `Removed the song on the position \`${position}\`.` : 'The provided position is not allowed (out of bounds).')
+      this.reply(context, removed ? `Removed \`${removed.title}\` on the position \`${position}\`.` : 'The provided position is not allowed (out of bounds).')
     }
   }
 

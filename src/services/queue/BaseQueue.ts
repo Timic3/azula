@@ -20,7 +20,7 @@ export default abstract class BaseQueue implements IQueue {
 
   abstract dequeue(): any;
 
-  abstract remove(index: number): any;
+  abstract remove(index: number): IQueueTrack | undefined;
 
   process() {
     if (this.queue.length === 0) {
