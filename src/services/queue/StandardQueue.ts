@@ -10,4 +10,11 @@ export default class StandardQueue extends BaseQueue {
   dequeue(): IQueueTrack {
     return this.queue.shift()!;
   }
+
+  remove(index: number): IQueueTrack | undefined {
+    if (index < this.queue.length && index > -1) {
+      return this.queue.splice(index, 1)[0];
+    }
+    return undefined
+  }
 }

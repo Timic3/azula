@@ -20,6 +20,8 @@ export default abstract class BaseQueue implements IQueue {
 
   abstract dequeue(): any;
 
+  abstract remove(index: number): IQueueTrack | undefined;
+
   process() {
     if (this.queue.length === 0) {
       this.current = null;
@@ -91,6 +93,6 @@ export default abstract class BaseQueue implements IQueue {
       return new Date(duration).toISOString().substring(14, 19)
     }
 
-    return new Date(duration).toISOString().substring(11, 16)
+    return new Date(duration).toISOString().substring(11, 19)
   }
 }
