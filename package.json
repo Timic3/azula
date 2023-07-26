@@ -46,7 +46,7 @@
     "tsup": "^6.7.0",
     "undici": "^5.22.0",
     "youtube-sr": "^4.3.4",
-    "ytdl-core": "npm:@distube/ytdl-core@^4.11.10"
+    "ytdl-core": "npm:@distube/ytdl-core@^4.11.17"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^3.3.4",
