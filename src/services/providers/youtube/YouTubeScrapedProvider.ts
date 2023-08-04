@@ -3,14 +3,23 @@ import { Video, YouTube } from 'youtube-sr';
 import AbstractProvider, { ProviderSearchList, ProviderSearchItem, ProviderSearchOneResult } from '#services/providers/AbstractProvider';
 
 export default class YouTubeScrapedProvider extends AbstractProvider {
+  protected LIMIT = 100;
+  protected NUMBER_OF_REQUESTS = 3;
+
   public async search(query: string): Promise<ProviderSearchList> {
     const result = await YouTube.search(query, { type: 'video', limit: 5 });
     return this.transformSearchData(result);
   }
 
   public async searchOne(query: string): Promise<ProviderSearchOneResult | null> {
-    if (YouTube.validate(query, 'PLAYLIST')) {
-      const result = await YouTube.getPlaylist(query, { limit: 100 });
+    if (YouTube.validate(query, 'PLAYLIST')) {      
+
+      // We always have one request
+      const result = await YouTube.getPlaylist(query, { limit: this.LIMIT });
+      for (let i = 1; i < this.NUMBER_OF_REQUESTS && result.videoCount > i * this.LIMIT; i++) {
+        await result.next();
+      }
+
       return {
         type: 'list',
         result: this.transformSearchData(result.videos),
