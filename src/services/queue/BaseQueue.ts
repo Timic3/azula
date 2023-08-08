@@ -3,7 +3,6 @@ import { ActivityType, VoiceBasedChannel } from 'discord.js';
 import { IQueue, IQueueTrack } from '#services/queue/IQueue';
 import Voice from '#services/voice/Voice';
 import { container } from '@sapphire/framework';
-import { AudioPlayerStatus } from '@discordjs/voice';
 
 export default abstract class BaseQueue implements IQueue {
   protected readonly voiceChannel: VoiceBasedChannel;
