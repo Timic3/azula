@@ -34,6 +34,14 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     return queue.shuffle(customArray);
   }
 
+  private buildPlayerSlider (currentTimestamp: number, duration: number) {
+    const slider = '───────────────────────────────────'
+    const percentage = currentTimestamp * 100 / duration
+    const value = Math.floor((slider.length - 1) * percentage / 100)
+    
+    return `${slider.substring(0, value)}⬤${slider.substring(value + 1)}`
+  }
+
   public buildQueueEmbed(queue: BaseQueue): EmbedBuilder | undefined {
     // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
     let queueEmbed;
@@ -42,11 +50,19 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
       const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
       const totalPlayTime = [queue.current.duration || 0, ...queue.queue.map(item => item.duration || 0)].reduce((a, b) => a + b, 0);
 
+      const currentTimestamp = (queue.current.timestamp || 0) * 1000
+      const duration = queue.current.duration || 0
+
+      const currentSongValue= `
+      \`${queue.current.title}\`
+      **${queue.formatDuration(currentTimestamp)} ${this.buildPlayerSlider(currentTimestamp, duration)} ${queue.formatDuration(duration)}**
+      `
+
       queueEmbed = new EmbedBuilder()
         .setColor(0xE0812D)
         .setThumbnail(queue.current.thumbnail || "")
         .addFields(
-          { "name": `Current song playing:`, "value": `\`${queue.current.title} (${queue.formatDuration(queue.current.duration || 0)})\``, "inline": true },
+          { "name": `Current song playing:`, "value": currentSongValue, "inline": true },
           { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
         );
       if (itemsRemaining){

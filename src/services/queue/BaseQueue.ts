@@ -22,6 +22,12 @@ export default abstract class BaseQueue implements IQueue {
 
   abstract remove(index: number): IQueueTrack | undefined;
 
+  abstract insert(index: number, track: IQueueTrack): any;
+
+  abstract incrementTimestamp(track: IQueueTrack): number;
+
+  public timestampInterval: any;
+
   process() {
     if (this.queue.length === 0) {
       this.current = null;
@@ -52,8 +58,10 @@ export default abstract class BaseQueue implements IQueue {
           { name: this.current.title, url: this.current.url, type: ActivityType.Streaming }
         ],
       });
-
+      
       this.voice.play(this.current.url);
+      clearInterval(this.timestampInterval)
+      this.timestampInterval = setInterval(this.increaseTimestamp.bind(this), 1000);
     } else {
       this.voice.stop();
     }
@@ -94,5 +102,11 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     return new Date(duration).toISOString().substring(11, 19)
+  }
+
+  increaseTimestamp (track: IQueueTrack) {
+    if (this.current) {
+      this.current.timestamp = this.incrementTimestamp(this.current)
+    }
   }
 }

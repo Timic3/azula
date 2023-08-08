@@ -1,6 +1,7 @@
 import { ProviderSearchItem, ProviderSearchList } from '#/services/providers/AbstractProvider';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Args, ChatInputCommand, Command } from '@sapphire/framework';
+import { isNullishOrEmpty } from '@sapphire/utilities';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -8,6 +9,7 @@ import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } 
   flags: ['s', 'shuffle'],
   description: 'Play or add music to queue.',
   preconditions: ['InsideVoiceChannel'],
+  options: ['position', 'p']
 })
 export class PlayCommand extends Command {
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
@@ -23,6 +25,12 @@ export class PlayCommand extends Command {
             .setMaxLength(100)
             .setRequired(true)
             .setAutocomplete(true)
+        )
+        .addIntegerOption((option) =>
+          option
+            .setName('position')
+            .setDescription('Add a song at a specific position.')
+            .setRequired(false)
         )
         .addBooleanOption((option) =>
           option
@@ -40,13 +48,16 @@ export class PlayCommand extends Command {
     await interaction.deferReply();
     const voiceChannel = (interaction.member as GuildMember).voice.channel as VoiceBasedChannel;
     const shouldShuffle = interaction.options.getBoolean('shuffle', false) || false;
-    this.handle(interaction, voiceChannel, interaction.options.getString('query', true), shouldShuffle);
+    const position = interaction.options.getInteger('position');
+    this.handle(interaction, voiceChannel, interaction.options.getString('query', true), shouldShuffle, position);
   }
 
   public async messageRun(message: Message, args: Args) {
     const voiceChannel = message.member?.voice.channel as VoiceBasedChannel;
+    const query = await args.rest('string')
+    const position = Number(args.getOption('position') || args.getOption('p'))
     const shouldShuffle = args.getFlags('s', 'shuffle');
-    this.handle(message, voiceChannel, await args.rest('string'), shouldShuffle);
+    this.handle(message, voiceChannel, query, shouldShuffle, position);
   }
 
   public override async autocompleteRun(interaction: Command.AutocompleteInteraction) {
@@ -63,7 +74,7 @@ export class PlayCommand extends Command {
     );
   }
 
-  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, query: string, shuffle: boolean) {
+  public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, query: string, shuffle: boolean, position: number | null) {
     const result = await this.container.provider.searchOne(query);
     if (result === null) return this.reply(context, `:diamonds: **Couldn't find anything with your query.**`);
 
@@ -75,17 +86,30 @@ export class PlayCommand extends Command {
       if (queue.queue.length === 0 && !queue.current) {
         this.reply(context, `Now playing \`${item.title}\`.`);
       } else {
-        this.reply(context, `Enqueueing \`${item.title}\` at position \`${queue.queue.length + 1}\`.`);
+        this.reply(context, `Enqueueing \`${item.title}\` at position \`${position ? position : queue.queue.length + 1}\`.`);
       }
 
-      queue.enqueue({
-        artist: item.author.title,
-        description: item.description,
-        duration: item.duration,
-        thumbnail: item.thumbnailUrl,
-        title: item.title,
-        url: item.sourceUrl,
-      });
+      if (position) {
+        queue.insert(position > 0 ? position - 1 : position, {
+          artist: item.author.title,
+          description: item.description,
+          duration: item.duration,
+          thumbnail: item.thumbnailUrl,
+          title: item.title,
+          url: item.sourceUrl,
+          timestamp: 0
+        });
+      } else {
+        queue.enqueue({
+          artist: item.author.title,
+          description: item.description,
+          duration: item.duration,
+          thumbnail: item.thumbnailUrl,
+          title: item.title,
+          url: item.sourceUrl,
+          timestamp: 0
+        });
+      }
     } else {
       const list = result.result as ProviderSearchList;
       
@@ -110,6 +134,7 @@ export class PlayCommand extends Command {
           thumbnail: item.thumbnailUrl,
           title: item.title,
           url: item.sourceUrl,
+          timestamp: 0
         });
       }
     }
