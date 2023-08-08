@@ -7,6 +7,7 @@ export interface IQueueTrack {
   thumbnail?: string;
   url: string;
   streamUrl?: string;
+  timestamp: number;
 }
 
 export interface IQueue {
@@ -15,4 +16,8 @@ export interface IQueue {
   dequeue(): IQueueTrack;
 
   remove(index: number): IQueueTrack | undefined;
+
+  insert(index: number, track: IQueueTrack): void;
+
+  incrementTimestamp (track: IQueueTrack): number;
 }

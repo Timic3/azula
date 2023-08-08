@@ -3,6 +3,7 @@ import { ActivityType, VoiceBasedChannel } from 'discord.js';
 import { IQueue, IQueueTrack } from '#services/queue/IQueue';
 import Voice from '#services/voice/Voice';
 import { container } from '@sapphire/framework';
+import { AudioPlayerStatus } from '@discordjs/voice';
 
 export default abstract class BaseQueue implements IQueue {
   protected readonly voiceChannel: VoiceBasedChannel;
@@ -21,6 +22,12 @@ export default abstract class BaseQueue implements IQueue {
   abstract dequeue(): any;
 
   abstract remove(index: number): IQueueTrack | undefined;
+
+  abstract insert(index: number, track: IQueueTrack): any;
+
+  abstract incrementTimestamp(track: IQueueTrack): number;
+
+  public timestampInterval: any;
 
   process() {
     if (this.queue.length === 0) {
@@ -52,8 +59,10 @@ export default abstract class BaseQueue implements IQueue {
           { name: this.current.title, url: this.current.url, type: ActivityType.Streaming }
         ],
       });
-
+      
       this.voice.play(this.current.url);
+      clearInterval(this.timestampInterval)
+      this.timestampInterval = setInterval(this.increaseTimestamp.bind(this), 1000);
     } else {
       this.voice.stop();
     }
@@ -94,5 +103,11 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     return new Date(duration).toISOString().substring(11, 19)
+  }
+
+  increaseTimestamp (track: IQueueTrack) {
+    if (this.current) {
+      this.current.timestamp = this.incrementTimestamp(this.current)
+    }
   }
 }
