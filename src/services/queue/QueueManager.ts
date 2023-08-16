@@ -35,11 +35,10 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
   }
 
   private buildPlayerSlider (currentTimestamp: number, duration: number) {
-    const slider = '───────────────────────────────────'
-    const percentage = currentTimestamp * 100 / duration
-    const value = Math.floor((slider.length - 1) * percentage / 100)
+    const slider = '───────────────────────────────────';
+    const value = Math.floor((slider.length - 1) * currentTimestamp / duration);
     
-    return `${slider.substring(0, value)}⬤${slider.substring(value + 1)}`
+    return `${slider.substring(0, value)}⬤${slider.substring(value + 1)}`;
   }
 
   public buildQueueEmbed(queue: BaseQueue): EmbedBuilder | undefined {
@@ -50,13 +49,13 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
       const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
       const totalPlayTime = [queue.current.duration || 0, ...queue.queue.map(item => item.duration || 0)].reduce((a, b) => a + b, 0);
 
-      const currentTimestamp = (queue.current.timestamp || 0) * 1000
-      const duration = queue.current.duration || 0
+      const currentTimestamp = queue.current?.timestamp ? Math. abs(queue.current.timestamp.getTime() - (new Date()).getTime()) : 0;
+      const duration = queue.current.duration || 0;
 
       const currentSongValue= `
       \`${queue.current.title}\`
       **${queue.formatDuration(currentTimestamp)} ${this.buildPlayerSlider(currentTimestamp, duration)} ${queue.formatDuration(duration)}**
-      `
+      `;
 
       queueEmbed = new EmbedBuilder()
         .setColor(0xE0812D)

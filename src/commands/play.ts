@@ -54,8 +54,8 @@ export class PlayCommand extends Command {
 
   public async messageRun(message: Message, args: Args) {
     const voiceChannel = message.member?.voice.channel as VoiceBasedChannel;
-    const query = await args.rest('string')
-    const position = Number(args.getOption('position') || args.getOption('p'))
+    const query = await args.rest('string');
+    const position = Number(args.getOption('position') || args.getOption('p'));
     const shouldShuffle = args.getFlags('s', 'shuffle');
     this.handle(message, voiceChannel, query, shouldShuffle, position);
   }
@@ -97,7 +97,7 @@ export class PlayCommand extends Command {
           thumbnail: item.thumbnailUrl,
           title: item.title,
           url: item.sourceUrl,
-          timestamp: 0
+          timestamp: undefined
         });
       } else {
         queue.enqueue({
@@ -107,7 +107,7 @@ export class PlayCommand extends Command {
           thumbnail: item.thumbnailUrl,
           title: item.title,
           url: item.sourceUrl,
-          timestamp: 0
+          timestamp: undefined
         });
       }
     } else {
@@ -134,7 +134,7 @@ export class PlayCommand extends Command {
           thumbnail: item.thumbnailUrl,
           title: item.title,
           url: item.sourceUrl,
-          timestamp: 0
+          timestamp: undefined
         });
       }
     }
