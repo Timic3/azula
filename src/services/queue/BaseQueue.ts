@@ -55,7 +55,6 @@ export default abstract class BaseQueue implements IQueue {
         ],
       });
 
-      this.setTimestamp();
       this.voice.play(this.current.url);
     } else {
       this.voice.stop();
@@ -97,9 +96,5 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     return new Date(duration).toISOString().substring(11, 19)
-  }
-
-  setTimestamp () {
-    if (this.current) this.current.timestamp = new Date();
   }
 }

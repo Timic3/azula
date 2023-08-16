@@ -96,8 +96,7 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl,
-          timestamp: undefined
+          url: item.sourceUrl
         });
       } else {
         queue.enqueue({
@@ -106,8 +105,7 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl,
-          timestamp: undefined
+          url: item.sourceUrl
         });
       }
     } else {
@@ -133,8 +131,7 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl,
-          timestamp: undefined
+          url: item.sourceUrl
         });
       }
     }

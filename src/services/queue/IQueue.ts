@@ -7,7 +7,6 @@ export interface IQueueTrack {
   thumbnail?: string;
   url: string;
   streamUrl?: string;
-  timestamp: Date | undefined;
 }
 
 export interface IQueue {
