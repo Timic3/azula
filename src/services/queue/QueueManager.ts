@@ -41,7 +41,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     return `${slider.substring(0, value)}⬤${slider.substring(value + 1)}`;
   }
 
-  public buildQueueEmbed(queue: BaseQueue): EmbedBuilder | undefined {
+  public buildQueueEmbed(voiceChannel: VoiceBasedChannel,queue: BaseQueue): EmbedBuilder | undefined {
     // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
     let queueEmbed;
     if (queue.current) {
@@ -49,7 +49,8 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
       const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
       const totalPlayTime = [queue.current.duration || 0, ...queue.queue.map(item => item.duration || 0)].reduce((a, b) => a + b, 0);
 
-      const currentTimestamp = queue.current?.timestamp ? Math. abs(queue.current.timestamp.getTime() - (new Date()).getTime()) : 0;
+      const voice = container.voiceManager.get(voiceChannel.guildId);
+      const currentTimestamp = voice?.getPlaybackDuration() || 0;
       const duration = queue.current.duration || 0;
 
       const currentSongValue= `
