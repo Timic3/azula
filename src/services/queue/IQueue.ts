@@ -15,4 +15,6 @@ export interface IQueue {
   dequeue(): IQueueTrack;
 
   remove(index: number): IQueueTrack | undefined;
+
+  insert(index: number, track: IQueueTrack): void;
 }

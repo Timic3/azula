@@ -22,6 +22,8 @@ export default abstract class BaseQueue implements IQueue {
 
   abstract remove(index: number): IQueueTrack | undefined;
 
+  abstract insert(index: number, track: IQueueTrack): any;
+
   process() {
     if (this.queue.length === 0) {
       this.current = null;

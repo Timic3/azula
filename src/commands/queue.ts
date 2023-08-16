@@ -32,7 +32,7 @@ export class PlayCommand extends Command {
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const queue = await this.container.queueManager.create(voiceChannel);
-    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
+    const queueEmbed = this.container.queueManager.buildQueueEmbed(voiceChannel, queue);
 
     queueEmbed && queue.current ? context.reply({ embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
   }
