@@ -11,6 +11,7 @@ declare module '@sapphire/pieces' {
     voiceManager: VoiceManager;
     queueManager: QueueManager;
     provider: AbstractProvider;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cache: Collection<string, any>;
   }
 }

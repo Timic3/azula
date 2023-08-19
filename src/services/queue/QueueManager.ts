@@ -23,14 +23,15 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     return newQueue;
   }
 
-  async skip(voiceChannel: VoiceBasedChannel): Promise<[IQueueTrack | undefined, IQueueTrack | undefined]> {
-    let queue = await this.create(voiceChannel);
-    const [skipped, current] = queue.skip()
-    return [skipped, current]
+  async skip(voiceChannel: VoiceBasedChannel): Promise<[IQueueTrack | null, IQueueTrack | null]> {
+    const queue = await this.create(voiceChannel);
+    const [skipped, current] = queue.skip();
+    return [skipped, current];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async shuffle(voiceChannel: VoiceBasedChannel, customArray?: Array<any>): Promise<BaseQueue | Array<any>> {
-    let queue = await this.create(voiceChannel);
+    const queue = await this.create(voiceChannel);
     return queue.shuffle(customArray);
   }
 
@@ -41,7 +42,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     return `${slider.substring(0, value)}⬤${slider.substring(value + 1)}`;
   }
 
-  public buildQueueEmbed(voiceChannel: VoiceBasedChannel,queue: BaseQueue): EmbedBuilder | undefined {
+  public buildQueueEmbed(voiceChannel: VoiceBasedChannel, queue: BaseQueue): EmbedBuilder | undefined {
     // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
     let queueEmbed;
     if (queue.current) {

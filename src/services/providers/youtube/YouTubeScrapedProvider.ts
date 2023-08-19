@@ -23,13 +23,13 @@ export default class YouTubeScrapedProvider extends AbstractProvider {
       return {
         type: 'list',
         result: this.transformSearchData(result.videos),
-      }
+      };
     } else if (YouTube.validate(query, 'VIDEO')) {
       const result = await YouTube.getVideo(query);
       return {
         type: 'item',
         result: this.transformVideoResultData(result),
-      }
+      };
     }
 
     const result = await YouTube.searchOne(query, 'video');
@@ -37,7 +37,7 @@ export default class YouTubeScrapedProvider extends AbstractProvider {
       return {
         type: 'item',
         result: this.transformVideoResultData(result),
-      }
+      };
     }
 
     return null;
@@ -56,8 +56,8 @@ export default class YouTubeScrapedProvider extends AbstractProvider {
     }
 
     return {
-      items
-    }
+      items,
+    };
   }
 
   private transformVideoResultData(video: Video): ProviderSearchItem {
@@ -73,6 +73,6 @@ export default class YouTubeScrapedProvider extends AbstractProvider {
       thumbnailUrl: video.thumbnail?.url ?? undefined,
       // Date of upload while scraping is really vague.
       // publishedAt: item.uploadedAt ? new Date(item.uploadedAt) : undefined,
-    }
+    };
   }
 }

@@ -1,8 +1,8 @@
 import { ActivityType, VoiceBasedChannel } from 'discord.js';
+import { container } from '@sapphire/framework';
 
 import { IQueue, IQueueTrack } from '#services/queue/IQueue';
 import Voice from '#services/voice/Voice';
-import { container } from '@sapphire/framework';
 
 export default abstract class BaseQueue implements IQueue {
   protected readonly voiceChannel: VoiceBasedChannel;
@@ -16,13 +16,13 @@ export default abstract class BaseQueue implements IQueue {
     this.voice = voice;
   }
 
-  abstract enqueue(track: IQueueTrack): any;
+  abstract enqueue(track: IQueueTrack): void;
 
-  abstract dequeue(): any;
+  abstract dequeue(): IQueueTrack;
 
-  abstract remove(index: number): IQueueTrack | undefined;
+  abstract remove(index: number): IQueueTrack | null;
 
-  abstract insert(index: number, track: IQueueTrack): any;
+  abstract insert(index: number, track: IQueueTrack): void;
 
   process() {
     if (this.queue.length === 0) {
@@ -41,7 +41,7 @@ export default abstract class BaseQueue implements IQueue {
     }
 
     this.current = this.dequeue();
-    this.playCurrent()
+    this.playCurrent();
   }
 
   playCurrent() {
@@ -51,7 +51,7 @@ export default abstract class BaseQueue implements IQueue {
       // TODO: We should move this somewhere else - preferably on an emitter/listener
       container.client.user?.setPresence({
         activities: [
-          { name: this.current.title, url: this.current.url, type: ActivityType.Streaming }
+          { name: this.current.title, url: this.current.url, type: ActivityType.Streaming },
         ],
       });
 
@@ -65,9 +65,10 @@ export default abstract class BaseQueue implements IQueue {
     const skipped = this.current;
     this.current = this.dequeue();
     this.playCurrent();
-    return [skipped || undefined, this.current || undefined];
+    return [skipped || null, this.current || null];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   shuffle(customArray?: Array<any>): BaseQueue | Array<any> {
     const queue = customArray || this.queue;
 
@@ -87,14 +88,14 @@ export default abstract class BaseQueue implements IQueue {
     return customArray;
   }
 
-  formatDuration (duration: number): String {
+  formatDuration (duration: number): string {
     // :param duration: miliseconds
     // We can use Moment.js library in the future, if needed
 
     if (duration / 1000 < 3600) {
-      return new Date(duration).toISOString().substring(14, 19)
+      return new Date(duration).toISOString().substring(14, 19);
     }
 
-    return new Date(duration).toISOString().substring(11, 19)
+    return new Date(duration).toISOString().substring(11, 19);
   }
 }

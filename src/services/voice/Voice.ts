@@ -118,12 +118,12 @@ export default class Voice extends EventEmitter {
   }
 
   public async stop() {
-    this.audioPlayer.stop(true)
+    this.audioPlayer.stop(true);
   }
 
   public getPlaybackDuration(): number {
-    if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) return this.audioPlayer.state.resource.playbackDuration || 0
-    return 0
+    if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) return this.audioPlayer.state.resource.playbackDuration || 0;
+    return 0;
   }
 
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {

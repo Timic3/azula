@@ -1,7 +1,6 @@
 import { ProviderSearchItem, ProviderSearchList } from '#/services/providers/AbstractProvider';
 import { ApplyOptions } from '@sapphire/decorators';
 import { Args, ChatInputCommand, Command } from '@sapphire/framework';
-import { isNullishOrEmpty } from '@sapphire/utilities';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -9,7 +8,7 @@ import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } 
   flags: ['s', 'shuffle'],
   description: 'Play or add music to queue.',
   preconditions: ['InsideVoiceChannel'],
-  options: ['position', 'p']
+  options: ['position', 'p'],
 })
 export class PlayCommand extends Command {
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
@@ -96,7 +95,7 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl
+          url: item.sourceUrl,
         });
       } else {
         queue.enqueue({
@@ -105,12 +104,12 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl
+          url: item.sourceUrl,
         });
       }
     } else {
       const list = result.result as ProviderSearchList;
-      
+
       let playlist = list.items;
       if (shuffle) {
         const shuffledItems = await this.container.queueManager.shuffle(voiceChannel, list.items);
@@ -131,7 +130,7 @@ export class PlayCommand extends Command {
           duration: item.duration,
           thumbnail: item.thumbnailUrl,
           title: item.title,
-          url: item.sourceUrl
+          url: item.sourceUrl,
         });
       }
     }

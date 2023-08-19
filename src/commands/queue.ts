@@ -1,7 +1,6 @@
-import BaseQueue from '#/services/queue/BaseQueue';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ChatInputCommand, Command } from '@sapphire/framework';
-import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
+import { GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
   aliases: ['q', 'queue'],

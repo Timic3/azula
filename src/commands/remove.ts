@@ -1,6 +1,5 @@
-import { ProviderSearchItem, ProviderSearchList } from '#/services/providers/AbstractProvider';
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command, PieceContext } from '@sapphire/framework';
+import { Args, ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -38,7 +37,7 @@ export class PlayCommand extends Command {
   }
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel, position: number) {
-    const queue = await this.container.queueManager.create(voiceChannel)
+    const queue = await this.container.queueManager.create(voiceChannel);
     if (position === 0) {
       const [skipped, current] = await this.container.queueManager.skip(voiceChannel);
 
@@ -50,8 +49,8 @@ export class PlayCommand extends Command {
       context.reply({ content: `Skipped \`${skipped.title}\`.\nI am now playing \`${current.title}\`.` }) :
       context.reply({ content: `Skipped \`${skipped.title}\`.\nThe queue is empty.` });
     } else {
-      const removed = queue.remove(position - 1)
-      this.reply(context, removed ? `Removed \`${removed.title}\` on the position \`${position}\`.` : 'The provided position is not allowed (out of bounds).')
+      const removed = queue.remove(position - 1);
+      this.reply(context, removed ? `Removed \`${removed.title}\` on the position \`${position}\`.` : 'The provided position is not allowed (out of bounds).');
     }
   }
 
