@@ -135,8 +135,8 @@ export default class Voice extends EventEmitter {
 
   private createVoiceConnection(voiceChannel: VoiceBasedChannel): VoiceConnection {
     return joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guildId,
+      channelId: voiceChannel.id as string,
+      guildId: voiceChannel.guildId as string,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
       selfDeaf: true,
       selfMute: false,
