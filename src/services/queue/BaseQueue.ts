@@ -3,6 +3,7 @@ import { container } from '@sapphire/framework';
 
 import { IQueue, IQueueTrack } from '#services/queue/IQueue';
 import Voice from '#services/voice/Voice';
+import MonitoringUtils from '#utils/MonitoringUtils';
 
 export default abstract class BaseQueue implements IQueue {
   protected readonly voiceChannel: VoiceBasedChannel;
@@ -55,7 +56,13 @@ export default abstract class BaseQueue implements IQueue {
         ],
       });
 
-      this.voice.play(this.current.url);
+      this.voice
+        .play(this.current.url)
+        .catch((error) => {
+          container.logger.error(error);
+          MonitoringUtils.logError(error);
+          this.process();
+        });
     } else {
       this.voice.stop();
     }
@@ -63,6 +70,7 @@ export default abstract class BaseQueue implements IQueue {
 
   skip() {
     const skipped = this.current;
+    this.voice.stop();
     this.current = this.dequeue();
     this.playCurrent();
     return [skipped || null, this.current || null];
