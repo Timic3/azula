@@ -1,6 +1,7 @@
 import '#infrastructure/setup';
 
 import AzulaClient from '#infrastructure/client/AzulaClient';
+import MonitoringUtils from '#utils/MonitoringUtils';
 
 const client = new AzulaClient();
 
@@ -10,5 +11,6 @@ try {
 } catch (error) {
   client.logger.fatal(error);
   client.destroy();
+  MonitoringUtils.logError(error as Error);
   process.exitCode = 1; // Keep event loop clean and exit gracefully
 }
