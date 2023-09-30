@@ -1,10 +1,11 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
+import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, NoSubscriberBehavior, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
 import { container } from '@sapphire/framework';
 import { VoiceBasedChannel } from 'discord.js';
 import { EventEmitter } from 'node:events';
 import { setTimeout as wait } from 'node:timers/promises';
-import { Readable } from 'node:stream';
-import play from '#services/stream/ytdl';
+// import { Readable } from 'node:stream';
+// import play from '#services/stream/ytdl';
+import play from 'play-dl';
 
 import VoiceManager from './VoiceManager';
 
@@ -24,7 +25,7 @@ export default class Voice extends EventEmitter {
     this.voiceConnection = this.createVoiceConnection(voiceChannel);
 
     this.voiceChannel = voiceChannel;
-    this.audioPlayer = createAudioPlayer();
+    this.audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } });
 
     this.voiceConnection.on('stateChange', async (oldState, newState) => {
       container.logger.info('Connection entering state from', oldState.status, 'to', newState.status);
@@ -99,12 +100,16 @@ export default class Voice extends EventEmitter {
   }
 
   public async play(url: string) {
-    const source = await play(url, {
+    /*const source = await play(url, {
       filter: 'audioonly',
       highWaterMark: 1 << 25,
     });
     this.audioResource = createAudioResource(source as unknown as Readable, {
       inputType: StreamType.Opus,
+    });*/
+    const stream = await play.stream(url);
+    this.audioResource = createAudioResource(stream.stream, {
+      inputType: stream.type,
     });
     this.audioPlayer.play(this.audioResource);
   }
