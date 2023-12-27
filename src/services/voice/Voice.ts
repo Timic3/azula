@@ -110,15 +110,16 @@ export default class Voice extends EventEmitter {
   }
 
   public async pause() {
-    this.audioPlayer.pause();
-  }
-
-  public async unpause() {
-    this.audioPlayer.unpause();
+    if (this.audioPlayer?.state?.status === AudioPlayerStatus.Playing) {
+      this.audioPlayer.pause();
+    } else if (this.audioPlayer?.state?.status === AudioPlayerStatus.Paused) {
+      this.audioPlayer.unpause();
+    }
+    return this.audioPlayer?.state?.status;
   }
 
   public async stop() {
-    this.audioPlayer.stop(true)
+    return this.audioPlayer.stop(true);
   }
 
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {
