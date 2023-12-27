@@ -1,4 +1,4 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, NoSubscriberBehavior, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
+import { AudioPlayer, AudioPlayerState, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, NoSubscriberBehavior, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
 import { container } from '@sapphire/framework';
 import { VoiceBasedChannel } from 'discord.js';
 import { EventEmitter } from 'node:events';
@@ -115,20 +115,25 @@ export default class Voice extends EventEmitter {
   }
 
   public async pause() {
-    this.audioPlayer.pause();
-  }
-
-  public async unpause() {
-    this.audioPlayer.unpause();
+    if (this.audioPlayer?.state?.status === AudioPlayerStatus.Playing) {
+      this.audioPlayer.pause();
+    } else if (this.audioPlayer?.state?.status === AudioPlayerStatus.Paused) {
+      this.audioPlayer.unpause();
+    }
+    return this.audioPlayer?.state?.status;
   }
 
   public async stop() {
-    this.audioPlayer.stop(true);
+    return this.audioPlayer.stop(true);
   }
 
   public getPlaybackDuration(): number {
     if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) return this.audioPlayer.state.resource.playbackDuration || 0;
     return 0;
+  }
+
+  public getCurrentState(): AudioPlayerState {
+    return this.audioPlayer?.state;
   }
 
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {

@@ -63,7 +63,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
         .setColor(0xE0812D)
         .setThumbnail(queue.current.thumbnail || "")
         .addFields(
-          { "name": `Current song playing:`, "value": currentSongValue, "inline": true },
+          { "name": `Current song ${voice?.getCurrentState()?.status}:`, "value": currentSongValue, "inline": true },
           { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
         );
       if (itemsRemaining){
