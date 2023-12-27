@@ -53,7 +53,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
       const voice = container.voiceManager.get(voiceChannel.guildId);
       const currentTimestamp = voice?.getPlaybackDuration() || 0;
       const duration = queue.current.duration || 0;
-
+      
       const currentSongValue = `
       \`${queue.current.title}\`
       **${queue.formatDuration(currentTimestamp)} ${this.buildPlayerSlider(currentTimestamp, duration)} ${queue.formatDuration(duration)}**
@@ -63,7 +63,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
         .setColor(0xE0812D)
         .setThumbnail(queue.current.thumbnail || "")
         .addFields(
-          { "name": `Current song playing:`, "value": currentSongValue, "inline": true },
+          { "name": `Current song ${voice?.getCurrentState()?.status}:`, "value": currentSongValue, "inline": true },
           { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
         );
       if (itemsRemaining){
