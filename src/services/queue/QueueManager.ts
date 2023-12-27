@@ -53,7 +53,7 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
       const voice = container.voiceManager.get(voiceChannel.guildId);
       const currentTimestamp = voice?.getPlaybackDuration() || 0;
       const duration = queue.current.duration || 0;
-      
+
       const currentSongValue = `
       \`${queue.current.title}\`
       **${queue.formatDuration(currentTimestamp)} ${this.buildPlayerSlider(currentTimestamp, duration)} ${queue.formatDuration(duration)}**

@@ -133,7 +133,7 @@ export default class Voice extends EventEmitter {
   }
 
   public getCurrentState(): AudioPlayerState {
-    return this.audioPlayer?.state
+    return this.audioPlayer?.state;
   }
 
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {

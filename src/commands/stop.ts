@@ -1,5 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command, PieceContext } from '@sapphire/framework';
+import { Args, ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
