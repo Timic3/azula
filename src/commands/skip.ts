@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command } from '@sapphire/framework';
-import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
+import { ChatInputCommand, Command } from '@sapphire/framework';
+import { GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
   aliases: ['s', 'skip'],

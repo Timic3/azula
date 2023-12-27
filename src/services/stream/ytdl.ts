@@ -1,9 +1,9 @@
 // TODO: Improve this whole mess. It's also probably very slow.
 
-import ytdl, { videoFormat } from "ytdl-core";
+import ytdl, { videoFormat } from 'ytdl-core';
 import prism from 'prism-media';
 
-import { pipeline, Readable } from 'node:stream';
+import { pipeline } from 'node:stream';
 
 function opusFilter(format: videoFormat) {
   return format.codecs === 'opus' &&

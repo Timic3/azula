@@ -1,10 +1,11 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, StreamType, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
+import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, DiscordGatewayAdapterCreator, entersState, joinVoiceChannel, NoSubscriberBehavior, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus } from '@discordjs/voice';
 import { container } from '@sapphire/framework';
 import { VoiceBasedChannel } from 'discord.js';
 import { EventEmitter } from 'node:events';
 import { setTimeout as wait } from 'node:timers/promises';
-import { Readable } from 'node:stream';
-import play from '#services/stream/ytdl';
+// import { Readable } from 'node:stream';
+// import play from '#services/stream/ytdl';
+import play from 'play-dl';
 
 import VoiceManager from './VoiceManager';
 
@@ -24,7 +25,7 @@ export default class Voice extends EventEmitter {
     this.voiceConnection = this.createVoiceConnection(voiceChannel);
 
     this.voiceChannel = voiceChannel;
-    this.audioPlayer = createAudioPlayer();
+    this.audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } });
 
     this.voiceConnection.on('stateChange', async (oldState, newState) => {
       container.logger.info('Connection entering state from', oldState.status, 'to', newState.status);
@@ -99,12 +100,16 @@ export default class Voice extends EventEmitter {
   }
 
   public async play(url: string) {
-    const source = await play(url, {
+    /*const source = await play(url, {
       filter: 'audioonly',
       highWaterMark: 1 << 25,
     });
     this.audioResource = createAudioResource(source as unknown as Readable, {
       inputType: StreamType.Opus,
+    });*/
+    const stream = await play.stream(url);
+    this.audioResource = createAudioResource(stream.stream, {
+      inputType: stream.type,
     });
     this.audioPlayer.play(this.audioResource);
   }
@@ -122,6 +127,11 @@ export default class Voice extends EventEmitter {
     return this.audioPlayer.stop(true);
   }
 
+  public getPlaybackDuration(): number {
+    if (this.audioPlayer.state.status === AudioPlayerStatus.Playing) return this.audioPlayer.state.resource.playbackDuration || 0;
+    return 0;
+  }
+
   private setVoiceChannel(voiceChannel: VoiceBasedChannel) {
     if (voiceChannel.id === this.voiceChannel.id) return;
     // Subscription to existing audio player might be handled internally by @discordjs/voice? Research.
@@ -131,8 +141,8 @@ export default class Voice extends EventEmitter {
 
   private createVoiceConnection(voiceChannel: VoiceBasedChannel): VoiceConnection {
     return joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guildId,
+      channelId: voiceChannel.id as string,
+      guildId: voiceChannel.guildId as string,
       adapterCreator: voiceChannel.guild.voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
       selfDeaf: true,
       selfMute: false,

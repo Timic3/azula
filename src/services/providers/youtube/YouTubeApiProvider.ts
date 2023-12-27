@@ -14,18 +14,18 @@ export default class YouTubeApiProvider extends AbstractProvider {
       },
       headers: {
         'User-Agent': 'XMLHttpRequest',
-      }
+      },
     });
 
     return this.transformSearchData((await body.json()) as Schema$SearchListResponse);
   }
 
   // TODO
-  public async searchOne(query: string): Promise<ProviderSearchOneResult | null> {
+  public async searchOne(): Promise<ProviderSearchOneResult | null> {
     return null;
   }
 
-  public async suggestions(query: string): Promise<string[]> {
+  public async suggestions(): Promise<string[]> {
     return [];
   }
 
@@ -49,7 +49,7 @@ export default class YouTubeApiProvider extends AbstractProvider {
     }
 
     return {
-      items
+      items,
     };
   }
 }

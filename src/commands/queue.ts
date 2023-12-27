@@ -1,7 +1,6 @@
-import BaseQueue from '#/services/queue/BaseQueue';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ChatInputCommand, Command } from '@sapphire/framework';
-import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
+import { GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
   aliases: ['q', 'queue'],
@@ -32,7 +31,7 @@ export class PlayCommand extends Command {
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const queue = await this.container.queueManager.create(voiceChannel);
-    const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
+    const queueEmbed = this.container.queueManager.buildQueueEmbed(voiceChannel, queue);
 
     queueEmbed && queue.current ? context.reply({ embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
   }

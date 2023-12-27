@@ -1,7 +1,6 @@
-import BaseQueue from '#/services/queue/BaseQueue';
 import { ApplyOptions } from '@sapphire/decorators';
 import { ChatInputCommand, Command } from '@sapphire/framework';
-import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel, EmbedBuilder } from 'discord.js';
+import { GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
   aliases: ['shuffle'],
@@ -35,7 +34,7 @@ export class PlayCommand extends Command {
     if (queue instanceof Array) {
       throw new Error("Queue should not be and instance of Array.");
     } else {
-      const queueEmbed = this.container.queueManager.buildQueueEmbed(queue);
+      const queueEmbed = this.container.queueManager.buildQueueEmbed(voiceChannel, queue);
       queueEmbed && queue.current ? context.reply({ content: `Shuffled the current playlist.`, embeds: [queueEmbed] }) : context.reply({ content: `The queue is empty.` });
     }
   }

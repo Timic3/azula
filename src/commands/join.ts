@@ -13,7 +13,7 @@ export class JoinCommand extends Command {
         .setName(this.name)
         .setDescription(this.description),
       {
-        idHints: ['1084134491343290518']
+        idHints: ['1084134491343290518'],
       }
     );
   }

@@ -21,9 +21,9 @@ export class SearchCommand extends Command {
             .setRequired(true)
         ),
       {
-        idHints: ['983125581140992051']
+        idHints: ['983125581140992051'],
       }
-    )
+    );
   }
 
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
@@ -78,7 +78,7 @@ export class SearchCommand extends Command {
           embed.addFields({
             name: 'Duration',
             value: DurationUtils.humanizeDuration(item.duration),
-            inline: true
+            inline: true,
           });
         }
 
@@ -86,7 +86,7 @@ export class SearchCommand extends Command {
           embed.setTimestamp(item.publishedAt);
         }
 
-        message.reply({ embeds: [ embed ] })
+        message.reply({ embeds: [ embed ] });
       } else {
         message.reply(':diamonds: **I could not find any video with that name, sorry!**');
       }

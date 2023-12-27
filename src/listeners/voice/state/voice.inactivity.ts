@@ -4,8 +4,8 @@ import { VoiceState } from 'discord.js';
 
 @ApplyOptions<Listener.Options>({ event: Events.VoiceStateUpdate })
 export class VoiceInactivityListener extends Listener {
-  public run(oldState: VoiceState, newState: VoiceState) {
-    if (oldState.channelId !== oldState.guild.members.me?.voice.channelId) return
+  public run(oldState: VoiceState) {
+    if (oldState.channelId !== oldState.guild.members.me?.voice.channelId) return;
 
     // Robots talking to each other with no humans present? Hell no!
     if ((oldState.channel?.members.filter(member => !member.user.bot).size) === 0) {

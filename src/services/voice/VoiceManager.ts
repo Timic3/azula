@@ -1,9 +1,9 @@
 import { VoiceBasedChannel } from 'discord.js';
 import { getVoiceConnection, VoiceConnectionStatus } from '@discordjs/voice';
+import { container } from '@sapphire/framework';
 
 import GuildIdResolver from '#services/resolvers/GuildIdResolver';
 import Voice from '#services/voice/Voice';
-import { container } from '@sapphire/framework';
 
 export default class VoiceManager extends GuildIdResolver<Voice> {
   join(voiceChannel: VoiceBasedChannel) {

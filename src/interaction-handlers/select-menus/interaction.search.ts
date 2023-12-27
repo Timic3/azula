@@ -3,7 +3,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import { StringSelectMenuInteraction } from 'discord.js';
 
 @ApplyOptions<InteractionHandler.Options>({
-  interactionHandlerType: InteractionHandlerTypes.SelectMenu
+  interactionHandlerType: InteractionHandlerTypes.SelectMenu,
 })
 export class SearchInteractionHandler extends InteractionHandler {
   public override parse(interaction: StringSelectMenuInteraction) {
