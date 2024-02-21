@@ -21,3 +21,8 @@ declare module '@sapphire/pieces' {
 process.on('uncaughtExceptionMonitor', (error: Error) => {
   MonitoringUtils.logError(error);
 });
+
+process.on('unhandledRejection', (reason: Error) => {
+  MonitoringUtils.logError(reason);
+  throw reason;
+});
