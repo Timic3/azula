@@ -104,7 +104,7 @@ export default class Voice extends EventEmitter {
     const source = ytdl(url, {
       filter: 'audioonly',
       quality: 'highestaudio',
-      // highWaterMark: 1 << 25,
+      highWaterMark: 1 << 25,
     });
     this.audioResource = createAudioResource(source);
     /** PLAY-DL */
