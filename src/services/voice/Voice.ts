@@ -4,8 +4,8 @@ import { VoiceBasedChannel } from 'discord.js';
 import { EventEmitter } from 'node:events';
 import { setTimeout as wait } from 'node:timers/promises';
 // import { Readable } from 'node:stream';
-// import play from '#services/stream/ytdl';
-import play from 'play-dl';
+import ytdl from '@distube/ytdl-core';
+// import play from 'play-dl';
 
 import VoiceManager from './VoiceManager';
 
@@ -100,17 +100,20 @@ export default class Voice extends EventEmitter {
   }
 
   public async play(url: string) {
-    /*const source = await play(url, {
+    /** YTDL */
+    const source = ytdl(url, {
       filter: 'audioonly',
-      highWaterMark: 1 << 25,
+      quality: 'highestaudio',
+      // highWaterMark: 1 << 25,
     });
-    this.audioResource = createAudioResource(source as unknown as Readable, {
-      inputType: StreamType.Opus,
-    });*/
+    this.audioResource = createAudioResource(source);
+    /** PLAY-DL */
+    /*
     const stream = await play.stream(url);
     this.audioResource = createAudioResource(stream.stream, {
       inputType: stream.type,
     });
+    */
     this.audioPlayer.play(this.audioResource);
   }
 
