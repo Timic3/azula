@@ -22,6 +22,8 @@ Currently, follow the steps listed below. Eventually, I plan to use separate Doc
 2. Fill `.env.example` with corresponding values. You do not need `YOUTUBE_API_KEY`, if you don't use official YouTube API.
 3. Run the bot with `npm run dev`.
 
+If playback doesn't work out of the box for you, follow instructions on how to generate Proof of Origin token [here](https://github.com/iv-org/youtube-trusted-session-generator) (using Docker is recommended!). Then set `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` inside `.env` appropriately.
+
 ## License
 
 License is GPL-3.0 because I think contributions go a long way.

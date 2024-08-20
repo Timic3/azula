@@ -35,7 +35,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.17.0",
-    "@distube/ytdl-core": "^4.13.5",
+    "@distube/ytdl-core": "^4.14.4",
     "@sapphire/decorators": "^6.1.0",
     "@sapphire/framework": "^5.2.1",
     "@sapphire/plugin-api": "^6.1.1",
@@ -48,7 +48,8 @@
     "sodium-native": "^4.1.1",
     "tsup": "^6.7.0",
     "undici": "^5.23.0",
-    "youtube-sr": "^4.3.11"
+    "youtube-sr": "^4.3.11",
+    "youtubei.js": "github:LuanRT/YouTube.js"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^3.3.4",
