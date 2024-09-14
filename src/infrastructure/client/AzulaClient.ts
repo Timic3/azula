@@ -3,7 +3,7 @@ import { Collection, GatewayIntentBits } from 'discord.js';
 
 import VoiceManager from '#services/voice/VoiceManager';
 import QueueManager from '#services/queue/QueueManager';
-import YouTubeScrapedProvider from '#services/providers/youtube/YouTubeScrapedProvider';
+import YouTubeScrapedV2Provider from '#services/providers/youtube/YouTubeScrapedV2Provider';
 
 export default class AzulaClient extends SapphireClient {
   public constructor() {
@@ -25,7 +25,7 @@ export default class AzulaClient extends SapphireClient {
 
     container.voiceManager = new VoiceManager();
     container.queueManager = new QueueManager();
-    container.provider = new YouTubeScrapedProvider(process.env.YOUTUBE_API_KEY as string);
+    container.provider = new YouTubeScrapedV2Provider(process.env.YOUTUBE_API_KEY as string);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     container.cache = new Collection<string, any>();
   }
