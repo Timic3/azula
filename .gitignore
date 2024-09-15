@@ -5,3 +5,5 @@ dist
 src/commands/eval.ts
 src/interaction-handlers/modals/interaction.eval.ts
 pu.sh
+!persistent/.gitkeep
+persistent

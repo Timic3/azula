@@ -1,7 +1,13 @@
-import { ClientType, Innertube, YTNodes } from 'youtubei.js';
+import { ClientType, Innertube, UniversalCache, YTNodes } from 'youtubei.js';
+import { InnerTubeClient } from 'youtubei.js/dist/src/types';
 
-const youtube = await Innertube.create({
-  client_type: ClientType.WEB,
+// This combination works for now!
+const CLIENT = ClientType.WEB;
+const CLIENT_STRING: InnerTubeClient = 'TV_EMBEDDED';
+
+export const youtube = await Innertube.create({
+  client_type: CLIENT,
+  cache: new UniversalCache(true, './persistent/youtube-cache'),
   generate_session_locally: false,
   enable_session_cache: false,
   retrieve_player: true,
@@ -9,15 +15,35 @@ const youtube = await Innertube.create({
   po_token: process.env.YOUTUBE_PO_TOKEN ?? undefined,
 });
 
+console.info('visitor_data:', process.env.YOUTUBE_VISITOR_DATA ?? undefined);
+console.info('po_token:', process.env.YOUTUBE_PO_TOKEN ?? undefined);
+
+youtube.session.on('update-credentials', async ({ credentials }) => {
+  console.info('Credentials updated:', credentials);
+  await youtube.session.oauth.cacheCredentials();
+});
+
+(async () => {
+  try {
+    // TODO: Use logger
+    console.info('[YouTube]', 'Logging in user...');
+    await youtube.session.signIn();
+    const user = await youtube.account.getInfo();
+    console.info('[YouTube]', `User ${user.contents?.contents.first().account_name} logged in successfully!`);
+  } catch (error) {
+    console.info('[YouTube]', error);
+  }
+})();
+
 export async function getVideoSearchResults(query: string) {
   const search = await youtube.search(query, { type: 'video' });
-  const videos = search.videos.as(YTNodes.Video) as YTNodes.Video[];
+  const videos = search.videos.filterType(YTNodes.Video) as YTNodes.Video[];
   return videos;
 }
 
 export async function getPlaylistVideoResults(playlistId: string) {
   const playlist = await youtube.getPlaylist(playlistId);
-  const videos = playlist.videos.as(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[];
+  const videos = playlist.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[];
   return videos;
 }
 
@@ -39,7 +65,7 @@ export function getPlaylistIdFromUrl(youtubeUrl: string): string | false {
 export async function getStreamUrl(videoId: string) {
   const info = await youtube.getBasicInfo(videoId);
   // const url = info.streaming_data?.formats[0].decipher(youtube.session.player);
-  const format = info.chooseFormat({ type: 'audio', quality: 'best', client: 'WEB' });
+  const format = info.chooseFormat({ type: 'audio', quality: 'best', client: CLIENT_STRING });
   const url = format.decipher(youtube.session.player);
   console.info('Playback URL:', url);
 
@@ -47,5 +73,5 @@ export async function getStreamUrl(videoId: string) {
 }
 
 export async function getAudioReadableStream(videoId: string) {
-  return youtube.download(videoId, { type: 'audio', quality: 'best', client: 'WEB' });
+  return youtube.download(videoId, { type: 'audio', quality: 'best', client: CLIENT_STRING });
 }
