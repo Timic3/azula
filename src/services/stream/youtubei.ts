@@ -4,6 +4,7 @@ import { InnerTubeClient } from 'youtubei.js/dist/src/types';
 // This combination works for now!
 const CLIENT = ClientType.WEB;
 const CLIENT_STRING: InnerTubeClient = 'WEB';
+const LIMIT = 500;
 
 export const youtube = await Innertube.create({
   client_type: CLIENT,
@@ -25,8 +26,14 @@ export async function getVideoSearchResults(query: string) {
 }
 
 export async function getPlaylistVideoResults(playlistId: string) {
-  const playlist = await youtube.getPlaylist(playlistId);
-  const videos = playlist.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[];
+  let videos: YTNodes.PlaylistVideo[] = [];
+  let feed = await youtube.getPlaylist(playlistId);
+
+  while (feed.has_continuation && videos.length < LIMIT) {
+    videos = videos.concat(feed.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[]);
+    feed = await feed.getContinuation();
+  }
+
   return videos;
 }
 
