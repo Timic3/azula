@@ -6,6 +6,8 @@ import { youtube } from '#services/stream/youtubei';
   description: 'Authenticate with YouTube OAuth.',
 })
 export class AuthCommand extends Command {
+  enabled: boolean = false;
+
   public override registerApplicationCommands(registry: ChatInputCommand.Registry) {
     registry.registerChatInputCommand((builder) =>
       builder

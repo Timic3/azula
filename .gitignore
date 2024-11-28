@@ -7,3 +7,4 @@ src/interaction-handlers/modals/interaction.eval.ts
 pu.sh
 !persistent/.gitkeep
 persistent
+cookies.json

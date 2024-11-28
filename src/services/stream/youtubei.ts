@@ -1,13 +1,13 @@
-import { ClientType, Innertube, UniversalCache, YTNodes } from 'youtubei.js';
+import { ClientType, Innertube, YTNodes } from 'youtubei.js';
 import { InnerTubeClient } from 'youtubei.js/dist/src/types';
 
 // This combination works for now!
 const CLIENT = ClientType.WEB;
-const CLIENT_STRING: InnerTubeClient = 'TV_EMBEDDED';
+const CLIENT_STRING: InnerTubeClient = 'WEB';
 
 export const youtube = await Innertube.create({
   client_type: CLIENT,
-  cache: new UniversalCache(true, './persistent/youtube-cache'),
+  // cache: new UniversalCache(true, './persistent/youtube-cache'),
   generate_session_locally: false,
   enable_session_cache: false,
   retrieve_player: true,
@@ -17,23 +17,6 @@ export const youtube = await Innertube.create({
 
 console.info('visitor_data:', process.env.YOUTUBE_VISITOR_DATA ?? undefined);
 console.info('po_token:', process.env.YOUTUBE_PO_TOKEN ?? undefined);
-
-youtube.session.on('update-credentials', async ({ credentials }) => {
-  console.info('Credentials updated:', credentials);
-  await youtube.session.oauth.cacheCredentials();
-});
-
-(async () => {
-  try {
-    // TODO: Use logger
-    console.info('[YouTube]', 'Logging in user...');
-    await youtube.session.signIn();
-    const user = await youtube.account.getInfo();
-    console.info('[YouTube]', `User ${user.contents?.contents.first().account_name} logged in successfully!`);
-  } catch (error) {
-    console.info('[YouTube]', error);
-  }
-})();
 
 export async function getVideoSearchResults(query: string) {
   const search = await youtube.search(query, { type: 'video' });

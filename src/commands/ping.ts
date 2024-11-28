@@ -1,6 +1,6 @@
 import { ApplyOptions } from '@sapphire/decorators';
 import { Command } from '@sapphire/framework';
-import { Message, StageChannel } from 'discord.js';
+import { Message } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
   aliases: ['ping', 'pong'],
@@ -8,7 +8,7 @@ import { Message, StageChannel } from 'discord.js';
 })
 export class PingCommand extends Command {
   public async messageRun(message: Message) {
-    if (!message.channel.isTextBased() || message.channel instanceof StageChannel) {
+    if (!message.channel.isSendable()) {
       return;
     }
 

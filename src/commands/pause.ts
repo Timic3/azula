@@ -1,5 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command } from '@sapphire/framework';
+import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -25,7 +25,7 @@ export class PlayCommand extends Command {
     this.handle(interaction, voiceChannel);
   }
 
-  public async messageRun(message: Message, args: Args) {
+  public async messageRun(message: Message) {
     const voiceChannel = message.member?.voice.channel as VoiceBasedChannel;
     this.handle(message, voiceChannel);
   }

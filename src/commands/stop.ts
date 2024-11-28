@@ -1,5 +1,5 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Args, ChatInputCommand, Command } from '@sapphire/framework';
+import { ChatInputCommand, Command } from '@sapphire/framework';
 import { ChatInputCommandInteraction, GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 
 @ApplyOptions<Command.Options>({
@@ -25,15 +25,15 @@ export class PlayCommand extends Command {
     this.handle(interaction, voiceChannel);
   }
 
-  public async messageRun(message: Message, args: Args) {
+  public async messageRun(message: Message) {
     const voiceChannel = message.member?.voice.channel as VoiceBasedChannel;
     this.handle(message, voiceChannel);
   }
 
   public async handle(context: Message | Command.ChatInputCommandInteraction, voiceChannel: VoiceBasedChannel) {
     const voice = this.container.voiceManager.get(voiceChannel.guildId);
-    voice?.stop()
-    this.reply(context, 'Playback stopped.')
+    voice?.stop();
+    this.reply(context, 'Playback stopped.');
   }
 
   private async reply(context: Message | ChatInputCommandInteraction, content: string) {
