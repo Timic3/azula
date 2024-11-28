@@ -31,7 +31,7 @@ export async function getPlaylistVideoResults(playlistId: string) {
 
   while (feed.has_continuation && videos.length < LIMIT) {
     videos = videos.concat(feed.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[]);
-    feed = await feed.getContinuation()
+    feed = await feed.getContinuation();
   }
 
   return videos;
