@@ -8,7 +8,7 @@ import { setTimeout as wait } from 'node:timers/promises';
 // import play from 'play-dl';
 
 import VoiceManager from './VoiceManager';
-import { getAudioReadableStream, getVideoIdFromUrl } from '../stream/youtubei.js';
+import { getVideoIdFromUrl, getSabrStream } from '../stream/youtubei.js';
 
 export default class Voice extends EventEmitter {
   private readonly voiceManager: VoiceManager;
@@ -105,7 +105,8 @@ export default class Voice extends EventEmitter {
     const videoId = getVideoIdFromUrl(url);
     if (!videoId) throw new Error('VIDEO_ID_NOT_FOUND');
 
-    const source = await getAudioReadableStream(videoId);
+    // const source = await getAudioReadableStream(videoId);
+    const source = await getSabrStream(videoId);
     this.audioResource = createAudioResource(source);
 
     /** YTDL */
