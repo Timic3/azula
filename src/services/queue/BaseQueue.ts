@@ -70,7 +70,6 @@ export default abstract class BaseQueue implements IQueue {
 
   skip() {
     const skipped = this.current;
-    this.voice.stop();
     this.current = this.dequeue();
     this.playCurrent();
     return [skipped || null, this.current || null];
@@ -96,7 +95,15 @@ export default abstract class BaseQueue implements IQueue {
     return customArray;
   }
 
-  formatDuration (duration: number): string {
+  getCurrentDuration(): number {
+    return (this.current?.duration || 0) * 1000;
+  }
+
+  getTotalDuration(): number {
+    return [this.getCurrentDuration(), ...this.queue.map(item => (item.duration || 0) * 1000)].reduce((a, b) => a + b, 0);
+  }
+
+  formatDuration(duration: number): string {
     // :param duration: miliseconds
     // We can use Moment.js library in the future, if needed
 
