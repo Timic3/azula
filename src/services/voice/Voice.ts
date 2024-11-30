@@ -50,7 +50,7 @@ export default class Voice extends EventEmitter {
       } else if (!this.readyLock && (newState.status === VoiceConnectionStatus.Connecting || newState.status === VoiceConnectionStatus.Signalling)) {
         this.readyLock = true;
         try {
-          await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
+          await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 10e3);
         } catch {
           this.leave();
         } finally {
@@ -83,7 +83,7 @@ export default class Voice extends EventEmitter {
     if (voiceChannel) this.setVoiceChannel(voiceChannel);
 
     try {
-      await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20e3);
+      await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 10e3);
     } catch {
       if (this.voiceConnection.state.status === VoiceConnectionStatus.Ready) return this;
       if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
