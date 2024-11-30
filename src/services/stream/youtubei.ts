@@ -36,12 +36,12 @@ export async function getVideoSearchResults(query: string) {
 }
 
 export async function getPlaylistVideoResults(playlistId: string) {
-  let videos: YTNodes.PlaylistVideo[] = [];
   let feed = await youtube.getPlaylist(playlistId);
+  let videos = feed.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[];
 
   while (feed.has_continuation && videos.length < LIMIT) {
-    videos = videos.concat(feed.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[]);
     feed = await feed.getContinuation();
+    videos = videos.concat(feed.videos.filterType(YTNodes.PlaylistVideo) as YTNodes.PlaylistVideo[]);
   }
 
   return videos;
