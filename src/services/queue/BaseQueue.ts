@@ -99,7 +99,7 @@ export default abstract class BaseQueue implements IQueue {
     return (this.current?.duration || 0) * 1000;
   }
 
-  getTotalDuration (): number {
+  getTotalDuration(): number {
     return [this.getCurrentDuration(), ...this.queue.map(item => (item.duration || 0) * 1000)].reduce((a, b) => a + b, 0);
   }
 
