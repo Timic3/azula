@@ -46,13 +46,14 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
     // TODO: We can add buttons to manipulate the queue (pagination, skip, etc.))
     let queueEmbed;
     if (queue.current) {
-      const queueTitles = queue.queue.slice(0, 5).map((item, index) => `\`${index + 1}. ${item.title} (${queue.formatDuration(item.duration || 0)})\``);
+      const duration = queue.getCurrentDuration();
+      const totalPlayTime = queue.getTotalDuration();
+
+      const queueTitles = queue.queue.slice(0, 5).map((item, index) => `\`${index + 1}. ${item.title} (${queue.formatDuration((item.duration || 0) * 1000)})\``);
       const itemsRemaining = (queue?.queue?.length || 0) - (queueTitles?.length || 0);
-      const totalPlayTime = [queue.current.duration || 0, ...queue.queue.map(item => item.duration || 0)].reduce((a, b) => a + b, 0);
 
       const voice = container.voiceManager.get(voiceChannel.guildId);
       const currentTimestamp = voice?.getPlaybackDuration() || 0;
-      const duration = queue.current.duration || 0;
 
       const currentSongValue = `
       \`${queue.current.title}\`
