@@ -62,11 +62,15 @@ export default class QueueManager extends GuildIdResolver<BaseQueue> {
 
       queueEmbed = new EmbedBuilder()
         .setColor(0xE0812D)
-        .setThumbnail(queue.current.thumbnail || "")
         .addFields(
           { "name": `Current song ${voice?.getCurrentState()?.status}:`, "value": currentSongValue, "inline": true },
           { "name": `Next items in queue:`, "value": queueTitles.length ? `${queueTitles.join('\n')}` : "No further items in queue." }
         );
+
+      if (queue?.current?.thumbnail) {
+        queueEmbed.setThumbnail(queue.current.thumbnail)
+      }
+
       if (itemsRemaining){
         queueEmbed.addFields({ "name": "\u200B", "value": `And \`${itemsRemaining}\` other items. Total playtime is \`${queue.formatDuration(totalPlayTime)}\`.` });
       } else {
