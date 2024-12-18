@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azula
+  namespace: discord-succy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azula
+  template:
+    metadata:
+      labels:
+        app: azula
+    spec:
+      containers:
+      - name: azula
+        image: ${DOCKER_REGISTRY}/azula:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DISCORD_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: azula-secrets
+              key: discord-token
+        - name: BOT_OWNER
+          valueFrom:
+            secretKeyRef:
+              name: azula-secrets
+              key: bot-owner
+        - name: MONITORING_WEBHOOK_ID
+          valueFrom:
+            secretKeyRef:
+              name: azula-secrets
+              key: monitoring-webhook-id
+        - name: MONITORING_WEBHOOK_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: azula-secrets
+              key: monitoring-webhook-token
+        #- name: YOUTUBE_VISITOR_DATA
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: azula-secrets
+        #      key: youtube-visitor-data
+        #- name: YOUTUBE_PO_TOKEN
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: azula-secrets
+        #      key: youtube-po-token

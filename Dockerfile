@@ -1,8 +1,8 @@
 # Base
 
-FROM node:18-alpine AS base
+FROM node:22-bookworm AS base
 
-RUN apk add --no-cache --virtual .build-deps \
+RUN apt-get install -y \
   g++ \
   make \
   automake \
@@ -23,9 +23,11 @@ ENV NODE_ENV="production"
 
 COPY --chown=node:node tsconfig.base.json tsconfig.base.json
 COPY --chown=node:node tsup.config.ts .
-COPY --chown=node:node src/ src/
 
 RUN npm install
+
+COPY --chown=node:node src/ src/
+
 RUN npm run build
 
 # Bot

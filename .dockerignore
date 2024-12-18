@@ -1,4 +1,5 @@
 .env
+.env.production
 dist
 node_modules
 .vscode
