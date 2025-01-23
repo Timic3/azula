@@ -52,7 +52,7 @@
     "tsup": "^6.7.0",
     "undici": "^5.23.0",
     "youtube-sr": "^4.3.11",
-    "youtubei.js": "github:LuanRT/YouTube.js#3ec16099747056ff862515d5b0c9ae32b48f1790"
+    "youtubei.js": "github:LuanRT/YouTube.js#32125c704565f425806a0721edd96e01028e3fdd"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^3.3.4",

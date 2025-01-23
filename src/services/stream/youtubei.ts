@@ -273,7 +273,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs): Promise<OnesieRequ
       poToken: poToken ? base64ToU8(poToken) : undefined,
       playbackCookie: undefined,
       clientInfo: {
-        clientName: parseInt(Constants.CLIENTS.TV.NAME_ID),
+        clientName: parseInt(Constants.CLIENT_NAME_IDS.TVHTML5),
         clientVersion: clonedInnerTubeContext.client.clientVersion,
       },
     },
