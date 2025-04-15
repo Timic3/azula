@@ -4,34 +4,32 @@
 
 ## Requirements
 
-Either Docker, if you want to only run the bot, otherwise I recommend [Volta](https://volta.sh/) as Node version manager.
-
-## Installation
-
-Start the bot with one simple command:
-
-```bash
-docker compose run
-```
+- Docker
+- Fill `.env` variables with your Discord token, template is inside `.env.example`
 
 ## Development
 
-Currently, follow the steps listed below. Eventually, I plan to use separate Docker Compose config for hot reload and stuff. Feel free to contribute.
+You can develop using Docker Compose, but you can also opt for native development. It's ultimately your choice.
 
-1. Install required packages with `npm install`. You will probably need `gcc` due to some native Node packages (like `@discordjs/opus`).
-2. Fill `.env.example` with corresponding values. You do not need `YOUTUBE_API_KEY`, if you don't use official YouTube API.
-3. Run the bot with `npm run dev`.
-
-If playback doesn't work out of the box for you, follow instructions on how to generate Proof of Origin token [here](https://github.com/iv-org/youtube-trusted-session-generator) (using Docker is recommended!). Then set `YOUTUBE_PO_TOKEN` and `YOUTUBE_VISITOR_DATA` inside `.env` appropriately.
-
-## Generating validation tokens
-
-1. Run `docker run quay.io/invidious/youtube-trusted-session-generator` on your local machine.
-2. Add `visitor_data` and `po_token` to the `.env`:
-
+```bash
+docker compose up
 ```
-YOUTUBE_VISITOR_DATA="Cg...iEgJw%3D%3D"
-YOUTUBE_PO_TOKEN="Mp...Sw=="
+
+## Installing new packages
+
+To install new packages, the following command will create an ephemeral container, run `npm install` and delete itself automatically. This will also update your `package-lock.json`, which is totally normal. You must restart and/or rebuild running Compose projects.
+
+```bash
+docker run --rm -it -v $(pwd):/usr/src/app -w /usr/src/app node:22-bookworm npm install
+```
+
+## Deployment
+
+You can deploy to Kubernetes, this is how we do it. But you can also run it simply within Docker and not worry about deployment stuff.
+
+```bash
+docker build -t azula:latest .
+docker run -e .env azula:latest
 ```
 
 ## License
