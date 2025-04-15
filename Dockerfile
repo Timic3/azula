@@ -2,13 +2,14 @@
 
 FROM node:22-bookworm AS base
 
-RUN apt-get install -y \
+RUN apt-get update -y && apt-get install -y \
   g++ \
   make \
   automake \
   autoconf \
   libtool \
-  python3
+  python3 \
+  ffmpeg
 
 WORKDIR /usr/src/app
 

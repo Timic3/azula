@@ -8,27 +8,11 @@ import { decryptResponse, encryptRequest } from '#utils/CryptUtils';
 const CLIENT = ClientType.WEB;
 const LIMIT = 500;
 
-let cookies = undefined;
-if (fs.existsSync('./persistent/cookies.txt')) {
-  console.info('Cookies have been found and loaded!');
-  cookies = fs.readFileSync('./persistent/cookies.txt', 'utf8').trim();
-}
-
 export const youtube = await Innertube.create({
   client_type: CLIENT,
-  // cache: new UniversalCache(true, './persistent/youtube-cache'),
-  // cache: new UniversalCache(false),
   generate_session_locally: false,
-  // enable_session_cache: false,
   retrieve_player: true,
-  visitor_data: process.env.YOUTUBE_VISITOR_DATA ?? undefined,
-  po_token: process.env.YOUTUBE_PO_TOKEN ?? undefined,
-  cookie: cookies,
 });
-
-console.info('cookie:', cookies);
-console.info('visitor_data:', process.env.YOUTUBE_VISITOR_DATA ?? undefined);
-console.info('po_token:', process.env.YOUTUBE_PO_TOKEN ?? undefined);
 
 export async function getVideoSearchResults(query: string) {
   const search = await youtube.search(query, { type: 'video' });
@@ -66,6 +50,13 @@ export function getPlaylistIdFromUrl(youtubeUrl: string): string | false {
 export async function getSabrStream(videoId: string): Promise<Readable> {
   // const info = await youtube.getBasicInfo(videoId);
   const info = await getOnesieStream(videoId);
+
+  if (info.playability_status?.status !== 'OK') {
+    console.error(info);
+    console.error(info.playability_status?.error_screen);
+    throw new Error('onesie request could not find stream');
+  }
+
   const format = info.chooseFormat({ type: 'audio', quality: 'best' });
   const audioFormat: Format = {
     itag: format.itag,
@@ -119,8 +110,8 @@ export async function getSabrStream(videoId: string): Promise<Readable> {
     audioFormats: [ audioFormat ],
     videoFormats: [ ],
     clientAbrState: {
-      startTimeMs: 0,
-      mediaType: 1,
+      playerTimeMs: 0,
+      enabledTrackTypesBitfield: 1,
     },
   });
 
@@ -201,8 +192,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs): Promise<OnesieRequ
   // Change or remove these if you want to use a different client. I chose TVHTML5 purely for testing.
   clonedInnerTubeContext.client.clientName = Constants.CLIENTS.TV.NAME;
   clonedInnerTubeContext.client.clientVersion = Constants.CLIENTS.TV.VERSION;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  
   const params: Record<string, any> = {
     playbackContext: {
       contentPlaybackContext: {
@@ -225,25 +215,27 @@ async function prepareOnesieRequest(args: OnesieRequestArgs): Promise<OnesieRequ
     ...params,
   };
 
-  const headers = [ {
-    name: 'Content-Type',
-    value: 'application/json',
-  },
-  {
-    name: 'User-Agent',
-    value: innertube.session.context.client.userAgent,
-  },
-  {
-    name: 'X-Goog-Visitor-Id',
-    value: innertube.session.context.client.visitorData,
-  } ];
+  const headers = [
+    {
+      name: 'Content-Type',
+      value: 'application/json',
+    },
+    {
+      name: 'User-Agent',
+      value: innertube.session.context.client.userAgent,
+    },
+    {
+      name: 'X-Goog-Visitor-Id',
+      value: innertube.session.context.client.visitorData,
+    },
+  ];
 
   const onesieRequest = Protos.OnesiePlayerRequest.encode({
     url: 'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8',
     headers,
     body: JSON.stringify(playerRequestJson),
     proxiedByTrustedBandaid: true,
-    field6: false,
+    skipResponseEncryption: true,
   }).finish();
 
   const { encrypted, hmac, iv } = await encryptRequest(clientKeyData, onesieRequest);
@@ -253,18 +245,22 @@ async function prepareOnesieRequest(args: OnesieRequestArgs): Promise<OnesieRequ
     playerRequest: {
       encryptedClientKey,
       encryptedOnesiePlayerRequest: encrypted,
+      /* 
+       * If you want to use an unencrypted player request:
+       * unencryptedOnesiePlayerRequest: onesieRequest, 
+       */
       enableCompression: false,
       hmac: hmac,
       iv: iv,
       TQ: true,
-      YP: true,
+      serializeResponseAsJson: true, // If false, the response will be serialized as protobuf.
     },
     clientAbrState: {
       timeSinceLastManualFormatSelectionMs: 0,
       lastManualDirection: 0,
-      quality: QUALITY.HD720,
-      selectedQualityHeight: QUALITY.HD720,
-      startTimeMs: 0,
+      lastManualSelectedResolution: QUALITY.HD720,
+      stickyResolution: QUALITY.HD720,
+      playerTimeMs: 0,
       visibility: 0,
     },
     streamerContext: {
@@ -304,7 +300,7 @@ async function getBasicInfo(innertube: Innertube, videoId: string): Promise<YT.V
     throw new Error('Invalid redirector response');
 
   const clientConfig = await getYouTubeTVClientConfig();
-  const onesieRequest = await prepareOnesieRequest({ videoId, /* If needed - poToken,*/ clientConfig, innertube });
+  const onesieRequest = await prepareOnesieRequest({ videoId, /* poToken: innertube.session.po_token, */ clientConfig, innertube });
 
   let url = `${redirectorResponseUrl.split('/initplayback')[0]}${clientConfig.baseUrl}`;
 
@@ -357,12 +353,12 @@ async function getBasicInfo(innertube: Innertube, videoId: string): Promise<YT.V
 
     const iv = onesiePlayerResponse.cryptoParams.iv;
     const hmac = onesiePlayerResponse.cryptoParams.hmac;
-    const encrypted = onesiePlayerResponse.data;
 
-    const decryptedData = await decryptResponse(iv, hmac, encrypted, clientConfig.clientKeyData);
+    // If skipResponseEncryption is set to true in the request, the response will not be encrypted.
+    const decryptedData = hmac?.length && iv?.length ? await decryptResponse(iv, hmac, onesiePlayerResponse.data, clientConfig.clientKeyData) : onesiePlayerResponse.data!;
     const response = Protos.OnesiePlayerResponse.decode(decryptedData);
 
-    if (response.onesieProxyStatus !== 1)
+    if (response.onesieProxyStatus !== Protos.OnesieProxyStatus.ONESIE_PROXY_STATUS_OK)
       throw new Error('Onesie proxy status not OK');
 
     if (response.httpStatus !== 200)

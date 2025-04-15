@@ -35,7 +35,6 @@
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.14.4",
     "@sapphire/decorators": "^6.1.1",
     "@sapphire/framework": "^5.3.1",
     "@sapphire/plugin-api": "^7.0.3",
@@ -43,26 +42,22 @@
     "@sapphire/type": "^2.5.1",
     "@sapphire/utilities": "^3.18.1",
     "discord.js": "^14.17.3",
-    "googlevideo": "^2.0.0",
-    "play-dl": "^1.9.7",
-    "prism-media": "^1.3.5",
+    "googlevideo": "^3.0.0",
     "sodium": "^3.0.2",
     "tsup": "^6.7.0",
     "undici": "^5.23.0",
     "youtube-sr": "^4.3.11",
-    "youtubei.js": "github:LuanRT/YouTube.js#75d39e7afbdb18846f10d803f63bcc1d87a16daa"
+    "youtubei.js": "github:LuanRT/YouTube.js#458c4900d78f9b16761faae421bcd8cb302f19b8"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^3.3.4",
-    "@types/express": "^5.0.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.47.0",
-    "ffmpeg-static": "^5.2.0",
     "typescript": "^5.3.3"
   },
   "volta": {
-    "node": "18.17.1"
+    "node": "22.14.0"
   }
 }

@@ -3,9 +3,6 @@ import { container } from '@sapphire/framework';
 import { VoiceBasedChannel } from 'discord.js';
 import { EventEmitter } from 'node:events';
 import { setTimeout as wait } from 'node:timers/promises';
-// import { Readable } from 'node:stream';
-// import ytdl from '@distube/ytdl-core';
-// import play from 'play-dl';
 
 import VoiceManager from './VoiceManager';
 import { getVideoIdFromUrl, getSabrStream } from '../stream/youtubei.js';
@@ -101,32 +98,12 @@ export default class Voice extends EventEmitter {
   }
 
   public async play(url: string) {
-    /** Youtubei.js */
     const videoId = getVideoIdFromUrl(url);
     if (!videoId) throw new Error('VIDEO_ID_NOT_FOUND');
 
-    // const source = await getAudioReadableStream(videoId);
     const source = await getSabrStream(videoId);
     this.audioResource = createAudioResource(source);
 
-    /** YTDL */
-    /*
-    const source = ytdl(url, {
-      filter: 'audioonly',
-      quality: 'highestaudio',
-      highWaterMark: 1 << 25,
-      agent: this.ytdlAgent ?? undefined,
-    });
-    this.audioResource = createAudioResource(source);
-    */
-
-    /** PLAY-DL */
-    /*
-    const stream = await play.stream(url);
-    this.audioResource = createAudioResource(stream.stream, {
-      inputType: stream.type,
-    });
-    */
     this.audioPlayer.play(this.audioResource);
   }
 
