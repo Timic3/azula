@@ -5,7 +5,8 @@ import { EventEmitter } from 'node:events';
 import { setTimeout as wait } from 'node:timers/promises';
 
 import VoiceManager from './VoiceManager';
-import { getVideoIdFromUrl, getSabrStream } from '../stream/youtubei.js';
+import { getVideoIdFromUrl, createSabrStream } from '../stream/youtubei.js';
+import Stream, { Readable } from 'node:stream';
 
 export default class Voice extends EventEmitter {
   private readonly voiceManager: VoiceManager;
@@ -101,8 +102,8 @@ export default class Voice extends EventEmitter {
     const videoId = getVideoIdFromUrl(url);
     if (!videoId) throw new Error('VIDEO_ID_NOT_FOUND');
 
-    const source = await getSabrStream(videoId);
-    this.audioResource = createAudioResource(source);
+    const source = await createSabrStream(videoId);
+    this.audioResource = createAudioResource(Readable.fromWeb(source.audioStream));
 
     this.audioPlayer.play(this.audioResource);
   }
