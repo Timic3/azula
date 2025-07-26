@@ -83,6 +83,7 @@ export async function createSabrStream(videoId: string): Promise<{audioStream: R
   console.log('Available formats: ', sabrFormats);
 
   const serverAbrStream = new SabrStream({
+    fetch: youtube.session.http.fetch_function,
     formats: sabrFormats,
     serverAbrStreamingUrl,
     videoPlaybackUstreamerConfig,
@@ -100,6 +101,8 @@ export async function createSabrStream(videoId: string): Promise<{audioStream: R
     enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
   });
   console.log('Format selected:', selectedFormats);
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
 
   return {
     audioStream
