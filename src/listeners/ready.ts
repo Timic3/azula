@@ -1,11 +1,11 @@
 import { ApplyOptions } from '@sapphire/decorators';
-import { Listener, Piece, PieceOptions, Store } from '@sapphire/framework';
+import { Events, Listener, Piece, PieceOptions, Store } from '@sapphire/framework';
 import { blue, gray, green, magenta, magentaBright, white, yellow } from 'colorette';
 
 const dev = process.env.NODE_ENV !== 'production';
 
-@ApplyOptions<Listener.Options>({ once: true })
-export class ReadyEvent extends Listener {
+@ApplyOptions<Listener.Options>({ event: Events.ClientReady, once: true })
+export class ClientReadyEvent extends Listener {
   private readonly style = dev ? yellow : blue;
 
   public async run() {
