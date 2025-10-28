@@ -43,11 +43,11 @@
     "@sapphire/utilities": "^3.18.2",
     "@snazzah/davey": "^0.1.6",
     "discord.js": "^14.22.1",
-    "googlevideo": "^4.0.3",
+    "googlevideo": "^4.0.4",
     "sodium": "^3.0.2",
     "tsup": "^8.5.0",
     "undici": "^7.15.0",
-    "youtubei.js": "^15.0.1"
+    "youtubei.js": "^16.0.1"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^5.0.1",

@@ -16,7 +16,7 @@ import {
 import { base64ToU8, buildSabrFormat, EnabledTrackTypes } from 'googlevideo/utils';
 import type { Part } from 'googlevideo/shared-types';
 import { SabrStream, type SabrPlaybackOptions } from 'googlevideo/sabr-stream'
-import { ClientType, Constants, Context, Innertube, YT, YTNodes } from 'youtubei.js';
+import { ClientType, Constants, Context, Innertube, Platform, type Types, YT, YTNodes } from 'youtubei.js';
 import { decryptResponse, encryptRequest } from '#utils/CryptUtils';
 
 const CLIENT = ClientType.WEB;
@@ -70,7 +70,7 @@ export async function createSabrStream(videoId: string): Promise<{audioStream: R
     throw new Error('onesie request could not find stream');
   }
 
-  const serverAbrStreamingUrl = youtube.session.player?.decipher(info.page[0].streaming_data?.server_abr_streaming_url);
+  const serverAbrStreamingUrl = await youtube.session.player?.decipher(info.page[0].streaming_data?.server_abr_streaming_url);
   const videoPlaybackUstreamerConfig = info.page[0].player_config?.media_common_config.media_ustreamer_request_config?.video_playback_ustreamer_config;
 
   if (!videoPlaybackUstreamerConfig)
@@ -208,6 +208,22 @@ type UmpPartHandler = (part: Part) => void;
 
 const enableCompression = true;
 
+Platform.shim.eval = async (data: Types.BuildScriptResult, env: Record<string, Types.VMPrimative>) => {
+  const properties = [];
+
+  if (env.n) {
+    properties.push(`n: exportedVars.nFunction("${env.n}")`);
+  }
+
+  if (env.sig) {
+    properties.push(`sig: exportedVars.sigFunction("${env.sig}")`);
+  }
+
+  const code = `${data.output}\nreturn { ${properties.join(', ')} }`;
+
+  return new Function(code)();
+};
+
 /**
  * Fetches and parses the YouTube TV client configuration.
  * Configurations from other clients can be used as well. I chose TVHTML5 for its simplicity.
@@ -260,7 +276,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
         vis: 0,
         splay: false,
         lactMilliseconds: '-1',
-        signatureTimestamp: innertube.session.player?.sts,
+        signatureTimestamp: innertube.session.player?.signature_timestamp,
       },
     },
     videoId,
