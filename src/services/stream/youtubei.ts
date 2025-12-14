@@ -308,7 +308,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
   ];
 
   const onesieInnertubeRequest = OnesieInnertubeRequest.encode({
-    url: 'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8&$fields=playerConfig,captions,playabilityStatus,streamingData,responseContext.mainAppWebResponseContext.datasyncId,videoDetails,playbackTracking',
+    url: 'https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8',
     headers,
     body: JSON.stringify(playerRequestJson),
     proxiedByTrustedBandaid: true,
