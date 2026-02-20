@@ -1,6 +1,3 @@
-import fs from 'node:fs';
-import { PassThrough, Readable } from 'node:stream';
-
 import { UmpReader, CompositeBuffer } from 'googlevideo/ump';
 import {
   UMPPartId,
@@ -11,11 +8,11 @@ import {
   OnesieInnertubeResponse,
   OnesieRequest,
   CompressionType,
-  OnesieHeaderType
+  OnesieHeaderType,
 } from 'googlevideo/protos';
 import { base64ToU8, buildSabrFormat, EnabledTrackTypes } from 'googlevideo/utils';
 import type { Part } from 'googlevideo/shared-types';
-import { SabrStream, type SabrPlaybackOptions } from 'googlevideo/sabr-stream'
+import { SabrStream } from 'googlevideo/sabr-stream';
 import { ClientType, Constants, Context, Innertube, Platform, type Types, YT, YTNodes } from 'youtubei.js';
 import { decryptResponse, encryptRequest } from '#utils/CryptUtils';
 
@@ -90,12 +87,13 @@ export async function createSabrStream(videoId: string): Promise<{audioStream: R
     // poToken: webPoTokenResult.poToken,
     clientInfo: {
       clientName: parseInt(Constants.CLIENT_NAME_IDS[youtube.session.context.client.clientName as keyof typeof Constants.CLIENT_NAME_IDS]),
-      clientVersion: youtube.session.context.client.clientVersion
-    }
+      clientVersion: youtube.session.context.client.clientVersion,
+    },
   });
 
   // Handle player reload events here...
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { videoStream, audioStream, selectedFormats } = await serverAbrStream.start({
     preferOpus: true,
     enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
@@ -105,7 +103,7 @@ export async function createSabrStream(videoId: string): Promise<{audioStream: R
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   return {
-    audioStream
+    audioStream,
   };
 }
 
@@ -269,7 +267,11 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
   // Change or remove these if you want to use a different client. I chose TVHTML5 purely for testing.
   clonedInnerTubeContext.client.clientName = Constants.CLIENTS.TV.NAME;
   clonedInnerTubeContext.client.clientVersion = Constants.CLIENTS.TV.VERSION;
+
+  // YouTube TVHTML5 doesn't let you pass configInfo anymore
+  delete clonedInnerTubeContext.client.configInfo;
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const params: Record<string, any> = {
     playbackContext: {
       contentPlaybackContext: {
@@ -312,7 +314,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
     headers,
     body: JSON.stringify(playerRequestJson),
     proxiedByTrustedBandaid: true,
-    skipResponseEncryption: true
+    skipResponseEncryption: true,
   }).finish();
 
   const { encrypted, hmac, iv } = await encryptRequest(clientKeyData, onesieInnertubeRequest);
@@ -330,7 +332,7 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
       hmac: hmac,
       iv: iv,
       useJsonformatterToParsePlayerResponse: false,
-      serializeResponseAsJson: true // If false, the response will be serialized as protobuf.
+      serializeResponseAsJson: true, // If false, the response will be serialized as protobuf.
     },
     streamerContext: {
       sabrContexts: [],
@@ -339,11 +341,11 @@ async function prepareOnesieRequest(args: OnesieRequestArgs) {
       playbackCookie: undefined,
       clientInfo: {
         clientName: parseInt(Constants.CLIENT_NAME_IDS[clonedInnerTubeContext.client.clientName as keyof typeof Constants.CLIENT_NAME_IDS]),
-        clientVersion: clonedInnerTubeContext.client.clientVersion
-      }
+        clientVersion: clonedInnerTubeContext.client.clientVersion,
+      },
     },
     bufferedRanges: [],
-    onesieUstreamerConfig
+    onesieUstreamerConfig,
   }).finish();
 
   const videoIdBytes = base64ToU8(videoId);
@@ -431,7 +433,7 @@ async function getBasicInfo(innertube: Innertube, videoId: string): Promise<YT.V
   const umpPartHandlers = new Map<UMPPartId, UmpPartHandler>([
     [ UMPPartId.SABR_ERROR, handleSabrError ],
     [ UMPPartId.ONESIE_HEADER, handleOnesieHeader ],
-    [ UMPPartId.ONESIE_DATA, handleOnesieData ]
+    [ UMPPartId.ONESIE_DATA, handleOnesieData ],
   ]);
 
   googUmp.read((part) => {
@@ -471,7 +473,7 @@ async function getBasicInfo(innertube: Innertube, videoId: string): Promise<YT.V
     const playerResponse = {
       success: true,
       status_code: 200,
-      data: JSON.parse(new TextDecoder().decode(response.body))
+      data: JSON.parse(new TextDecoder().decode(response.body)),
     };
 
     return new YT.VideoInfo([ playerResponse ], innertube.actions, '');
