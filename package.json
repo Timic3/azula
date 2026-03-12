@@ -47,7 +47,7 @@
     "sodium": "^3.0.2",
     "tsup": "^8.5.0",
     "undici": "^7.15.0",
-    "youtubei.js": "github:LuanRT/YouTube.js#e83039637e4d7ac857f437a630a8013d6528a544"
+    "youtubei.js": "github:LuanRT/YouTube.js#21583f7eec0a06b8a7536abfb55942f4ab300e1e"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^5.0.1",
