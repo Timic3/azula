@@ -42,15 +42,18 @@
     "@sapphire/type": "^2.6.0",
     "@sapphire/utilities": "^3.18.2",
     "@snazzah/davey": "^0.1.6",
+    "bgutils-js": "^3.2.0",
     "discord.js": "^14.22.1",
     "googlevideo": "^4.0.4",
+    "jsdom": "^29.0.1",
     "sodium": "^3.0.2",
     "tsup": "^8.5.0",
     "undici": "^7.15.0",
-    "youtubei.js": "github:LuanRT/YouTube.js#21583f7eec0a06b8a7536abfb55942f4ab300e1e"
+    "youtubei.js": "github:LuanRT/YouTube.js#cf5412986b102be7e8e11c87a0d877249caedce5"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^5.0.1",
+    "@types/jsdom": "^28.0.1",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",

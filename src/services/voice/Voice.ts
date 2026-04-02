@@ -6,7 +6,7 @@ import { setTimeout as wait } from 'node:timers/promises';
 
 import VoiceManager from './VoiceManager';
 import { getVideoIdFromUrl, createSabrStream } from '../stream/youtubei.js';
-import Stream, { Readable } from 'node:stream';
+import { Readable } from 'node:stream';
 
 export default class Voice extends EventEmitter {
   private readonly voiceManager: VoiceManager;
