@@ -30,38 +30,44 @@
   },
   "homepage": "https://github.com/Timic3/azula#readme",
   "engines": {
-    "node": ">=v16.x"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "dependencies": {
     "@discordjs/opus": "^0.10.0",
-    "@discordjs/voice": "^0.19.0",
+    "@discordjs/voice": "^0.19.2",
     "@sapphire/decorators": "^6.2.0",
-    "@sapphire/framework": "^5.3.6",
+    "@sapphire/framework": "^5.5.0",
     "@sapphire/plugin-api": "^8.3.1",
     "@sapphire/plugin-logger": "^4.1.0",
     "@sapphire/type": "^2.6.0",
     "@sapphire/utilities": "^3.18.2",
-    "@snazzah/davey": "^0.1.6",
-    "bgutils-js": "^3.2.0",
-    "discord.js": "^14.22.1",
-    "googlevideo": "^4.0.4",
-    "jsdom": "^29.0.1",
+    "bgutils-js": "^4.0.3",
+    "discord.js": "^14.27.0",
+    "googlevideo": "^4.1.1",
+    "jsdom": "^30.0.1",
     "sodium": "^3.0.2",
     "tsup": "^8.5.0",
-    "undici": "^7.15.0",
-    "youtubei.js": "github:LuanRT/YouTube.js#cf5412986b102be7e8e11c87a0d877249caedce5"
+    "undici": "^8.10.0",
+    "youtubei.js": "github:LuanRT/YouTube.js#0bdd5f198305c40f09f39ea2bf12f686dce02b55"
   },
   "devDependencies": {
     "@sapphire/ts-config": "^5.0.1",
-    "@types/jsdom": "^28.0.1",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
     "eslint": "^8.57.0",
-    "ffmpeg-static": "^5.2.0",
+    "ffmpeg-static": "^5.3.0",
     "typescript": "^5.9.2"
   },
   "volta": {
-    "node": "22.19.0"
+    "node": "26.7.0"
+  },
+  "allowScripts": {
+    "@discordjs/opus@0.10.0": true,
+    "@sapphire/type@2.6.0": true,
+    "esbuild@0.25.9": true,
+    "ffmpeg-static@5.3.0": true,
+    "sodium@3.0.2": true
   }
 }

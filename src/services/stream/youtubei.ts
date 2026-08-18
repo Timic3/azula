@@ -1,7 +1,7 @@
 import { ClientType, YTNodes } from 'youtubei.js';
 import { Innertube } from 'youtubei.js';
 
-import { USER_AGENT } from 'bgutils-js';
+import { USER_AGENT } from 'bgutils-js/utils';
 
 const CLIENT = ClientType.WEB;
 const LIMIT = 500;
@@ -51,5 +51,4 @@ export async function getAudioReadableStream(videoId: string) {
   return youtube.download(videoId, { type: 'audio', quality: 'best' });
 }
 
-// export { createSabrStream } from './method/onesie.js';
 export { createSabrStream } from './method/sabr.js';

@@ -2,8 +2,9 @@ import Innertube, { Constants, IPlayerResponse, Platform, Types, UniversalCache,
 import { SabrStream } from 'googlevideo/sabr-stream';
 import { buildSabrFormat, EnabledTrackTypes } from 'googlevideo/utils';
 import { ReloadPlaybackContext } from 'googlevideo/protos';
-import BG, { buildURL, GOOG_API_KEY, USER_AGENT, WebPoSignalOutput } from 'bgutils-js';
-import { JSDOM } from 'jsdom';
+import { USER_AGENT } from 'bgutils-js/utils';
+
+import { invalidatePoTokenMinter, mintPoToken } from '../potoken.js';
 
 Platform.shim.eval = async (data: Types.BuildScriptResult, env: Record<string, Types.VMPrimative>) => {
   const properties = [];
@@ -21,16 +22,36 @@ Platform.shim.eval = async (data: Types.BuildScriptResult, env: Record<string, T
   return new Function(code)();
 };
 
+/**
+ * The InnerTube session is shared across tracks on purpose: a PO token is only accepted by the
+ * SABR server when the player request that produced the streaming URL was made by the very same
+ * session. Creating a session per track hands YouTube a token that belongs to someone else, and
+ * it responds with `sps: 2` - roughly a minute of media, then nothing.
+ *
+ * The user agent has to match the one BotGuard attested with, hence bgutils' constant.
+ */
+let innertubePromise: Promise<Innertube> | undefined;
+
+function getInnertube(): Promise<Innertube> {
+  innertubePromise ??= Innertube.create({
+    user_agent: USER_AGENT,
+    cache: new UniversalCache(true),
+  });
+  return innertubePromise;
+}
+
 export async function createSabrStream(
   videoId: string
 ): Promise<{
   audioStream: ReadableStream<Uint8Array<ArrayBufferLike>>
 }> {
-  const innertube = await Innertube.create({ cache: new UniversalCache(true) });
-  const webPoTokenResult = await generatePoToken(videoId);
+  const innertube = await getInnertube();
+
+  // Web mints a content bound token per video, so the binding is the video ID rather than visitor data.
+  const poToken = await mintPoToken(videoId);
 
   // Get video metadata.
-  const playerResponse = await makePlayerRequest(innertube, videoId);
+  const playerResponse = await makePlayerRequest(innertube, videoId, poToken);
   const videoTitle = playerResponse.video_details?.title || 'Unknown Video';
 
   console.info(`
@@ -47,8 +68,7 @@ export async function createSabrStream(
   }
 
   // Now get the streaming information.
-  const serverAbrStreamingUrl = await innertube.session.player?.decipher(playerResponse.streaming_data?.server_abr_streaming_url);
-  const videoPlaybackUstreamerConfig = playerResponse.player_config?.media_common_config.media_ustreamer_request_config?.video_playback_ustreamer_config;
+  const { serverAbrStreamingUrl, videoPlaybackUstreamerConfig } = await resolveStreamingConfig(innertube, playerResponse);
 
   if (!videoPlaybackUstreamerConfig) throw new Error('ustreamerConfig not found');
   if (!serverAbrStreamingUrl) throw new Error('serverAbrStreamingUrl not found');
@@ -56,41 +76,62 @@ export async function createSabrStream(
   const sabrFormats = playerResponse.streaming_data?.adaptive_formats.map(buildSabrFormat) || [];
 
   const serverAbrStream = new SabrStream({
+    fetch: innertube.session.http.fetch_function,
     formats: sabrFormats,
     serverAbrStreamingUrl,
     videoPlaybackUstreamerConfig,
-    poToken: webPoTokenResult,
+    poToken,
+    durationMs: playerResponse.video_details?.duration ? playerResponse.video_details.duration * 1000 : undefined,
     clientInfo: {
       clientName: parseInt(Constants.CLIENT_NAME_IDS[innertube.session.context.client.clientName as keyof typeof Constants.CLIENT_NAME_IDS]),
       clientVersion: innertube.session.context.client.clientVersion,
     },
   });
 
+  // Anything above 1 means the server rejected our PO token and is only letting the cold start
+  // allowance (1-2 MB, about a minute of audio) through, so start over from a fresh attestation.
+  // The server repeats this status on every response, so only act on the first one.
+  let handledProtectionStatus = false;
+
+  serverAbrStream.on('streamProtectionStatusUpdate', (status) => {
+    if ((status.status || 0) < 2 || handledProtectionStatus) return;
+    handledProtectionStatus = true;
+
+    console.warn(`Stream protection status ${status.status}, rebuilding attestation`);
+
+    invalidatePoTokenMinter();
+
+    mintPoToken(videoId)
+      .then((refreshedPoToken) => serverAbrStream.setPoToken(refreshedPoToken))
+      .catch(console.error);
+  });
+
   // Handle player response reload events (e.g, when IP changes, or formats expire).
   serverAbrStream.on('reloadPlayerResponse', async (reloadPlaybackContext) => {
-    const playerResponse = await makePlayerRequest(innertube, videoId, reloadPlaybackContext);
+    try {
+      const refreshedPoToken = await mintPoToken(videoId);
+      const playerResponse = await makePlayerRequest(innertube, videoId, refreshedPoToken, reloadPlaybackContext);
+      const { serverAbrStreamingUrl, videoPlaybackUstreamerConfig } = await resolveStreamingConfig(innertube, playerResponse);
 
-    const serverAbrStreamingUrl = await innertube.session.player?.decipher(playerResponse.streaming_data?.server_abr_streaming_url);
-    const videoPlaybackUstreamerConfig = playerResponse.player_config?.media_common_config.media_ustreamer_request_config?.video_playback_ustreamer_config;
-
-    if (serverAbrStreamingUrl && videoPlaybackUstreamerConfig) {
-      serverAbrStream.setStreamingURL(serverAbrStreamingUrl);
-      serverAbrStream.setUstreamerConfig(videoPlaybackUstreamerConfig);
+      if (serverAbrStreamingUrl && videoPlaybackUstreamerConfig) {
+        serverAbrStream.setPoToken(refreshedPoToken);
+        serverAbrStream.setStreamingURL(serverAbrStreamingUrl);
+        serverAbrStream.setUstreamerConfig(videoPlaybackUstreamerConfig);
+      }
+    } catch (error) {
+      console.error('Could not reload player response', error);
     }
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { videoStream, audioStream, selectedFormats } = await serverAbrStream.start({
+  const { audioStream } = await serverAbrStream.start({
     preferOpus: true,
     enabledTrackTypes: EnabledTrackTypes.AUDIO_ONLY,
   });
 
-  return {
-    audioStream: audioStream,
-  };
+  return { audioStream };
 }
 
-export async function makePlayerRequest(innertube: Innertube, videoId: string, reloadPlaybackContext?: ReloadPlaybackContext): Promise<IPlayerResponse> {
+export async function makePlayerRequest(innertube: Innertube, videoId: string, poToken?: string, reloadPlaybackContext?: ReloadPlaybackContext): Promise<IPlayerResponse> {
   const watchEndpoint = new YTNodes.NavigationEndpoint({ watchEndpoint: { videoId } });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +148,12 @@ export async function makePlayerRequest(innertube: Innertube, videoId: string, r
     racyCheckOk: true,
   };
 
+  // Without this the streaming URL is issued to an unattested session, and the SABR server cuts
+  // media off once the cold start allowance runs out.
+  if (poToken) {
+    extraArgs.serviceIntegrityDimensions = { poToken };
+  }
+
   if (reloadPlaybackContext) {
     extraArgs.playbackContext.reloadPlaybackContext = reloadPlaybackContext;
   }
@@ -114,75 +161,14 @@ export async function makePlayerRequest(innertube: Innertube, videoId: string, r
   return await watchEndpoint.call<IPlayerResponse>(innertube.actions, { ...extraArgs, parse: true });
 }
 
-const userAgent = USER_AGENT;
+/**
+ * Pulls the two values SABR needs out of a player response, deciphering the streaming URL.
+ */
+async function resolveStreamingConfig(innertube: Innertube, playerResponse: IPlayerResponse) {
+  const serverAbrStreamingUrl = playerResponse.streaming_data?.server_abr_streaming_url;
 
-export async function generatePoToken(videoId: string) {
-    // @NOTE: Session cache is disabled so we can get a fresh visitor data string.
-    const innertube = await Innertube.create({ user_agent: userAgent, enable_session_cache: false });
-    // const visitorData = innertube.session.context.client.visitorData || '';
-
-    const dom = new JSDOM('<!DOCTYPE html><html lang="en"><head><title></title></head><body></body></html>', {
-        url: 'https://www.youtube.com/',
-        referrer: 'https://www.youtube.com/',
-        resources: { userAgent },
-        beforeParse(window) {
-          window.HTMLCanvasElement.prototype.getContext = () => null;
-        },
-    });
-
-    Object.assign(globalThis, {
-        window: dom.window,
-        document: dom.window.document,
-        location: dom.window.location,
-        origin: dom.window.origin,
-    });
-
-    if (!Reflect.has(globalThis, 'navigator')) {
-        Object.defineProperty(globalThis, 'navigator', { value: dom.window.navigator });
-    }
-
-    const challengeResponse = await innertube.getAttestationChallenge('ENGAGEMENT_TYPE_UNBOUND');
-    if (!challengeResponse.bg_challenge)
-        throw new Error('Could not get challenge');
-
-    const interpreterUrl = challengeResponse.bg_challenge.interpreter_url.private_do_not_access_or_else_trusted_resource_url_wrapped_value;
-    const bgScriptResponse = await fetch(`https:${interpreterUrl}`);
-    const interpreterJavascript = await bgScriptResponse.text();
-
-    if (interpreterJavascript) {
-        new Function(interpreterJavascript)();
-    } else throw new Error('Could not load VM');
-
-    const botguard = await BG.BotGuardClient.create({
-        program: challengeResponse.bg_challenge.program,
-        globalName: challengeResponse.bg_challenge.global_name,
-        globalObj: globalThis,
-    });
-
-    const webPoSignalOutput: WebPoSignalOutput = [];
-    const botguardResponse = await botguard.snapshot({ webPoSignalOutput });
-    const requestKey = 'O43z0dpjhgX20SCx4KAo';
-
-    const integrityTokenResponse = await fetch(buildURL('GenerateIT', true), {
-        method: 'POST',
-        headers: {
-            'content-type': 'application/json+protobuf',
-            'x-goog-api-key': GOOG_API_KEY,
-            'x-user-agent': 'grpc-web-javascript/0.1',
-            'user-agent': userAgent,
-        },
-        body: JSON.stringify([ requestKey, botguardResponse ]),
-    });
-
-    const response = await integrityTokenResponse.json();
-
-    if (typeof response[0] !== 'string')
-        throw new Error('Could not get integrity token');
-
-    const integrityTokenBasedMinter = await BG.WebPoMinter.create({ integrityToken: response[0] }, webPoSignalOutput);
-
-    const contentPoToken = await integrityTokenBasedMinter.mintAsWebsafeString(videoId);
-    // const sessionPoToken = await integrityTokenBasedMinter.mintAsWebsafeString(visitorData);
-
-    return contentPoToken;
+  return {
+    serverAbrStreamingUrl: serverAbrStreamingUrl ? await innertube.session.player?.decipher(serverAbrStreamingUrl) : undefined,
+    videoPlaybackUstreamerConfig: playerResponse.player_config?.media_common_config.media_ustreamer_request_config?.video_playback_ustreamer_config,
+  };
 }

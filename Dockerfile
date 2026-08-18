@@ -1,6 +1,6 @@
 # Base
 
-FROM node:22-bookworm AS base
+FROM node:26-bookworm AS base
 
 ARG ENV="production"
 
