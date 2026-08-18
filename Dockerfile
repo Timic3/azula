@@ -27,7 +27,7 @@ ENV NODE_ENV=${ENV}
 COPY --chown=node:node tsconfig.base.json tsconfig.base.json
 COPY --chown=node:node tsup.config.ts .
 
-RUN npm install
+RUN npm ci
 
 COPY --chown=node:node src/ src/
 
